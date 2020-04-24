@@ -1,0 +1,28 @@
+#home {
+    /** Desktop View */
+	.forms-container {
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		.game-option {
+			margin: 1rem;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+	}
+
+	@media only screen and (max-width: 600px) {
+		.forms-container {
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			.game-option {
+				margin: 1rem;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+		}
+	}
+}
