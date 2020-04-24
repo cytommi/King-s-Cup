@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const redis = require('redis');
 const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
@@ -10,6 +10,9 @@ require('dotenv').config({
 	path: path.join(__dirname, `../.env.${NODE_ENV}`)
 });
 
+const { SERVER_PORT, REDIS_PORT } = process.env;
+const redisClient = redis.createClient(REDIS_PORT);
+
 const setupServer = async () => {
 	const app = express();
 	app.set('view engine', 'pug');
@@ -17,23 +20,6 @@ const setupServer = async () => {
 	app.use(express.static(path.join(__dirname, '../dist'), { index: false }));
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(bodyParser.json());
-
-	try {
-		const mongoOptions = {
-			useNewUrlParser: true,
-			useCreateIndex: true,
-			useUnifiedTopology: true
-		};
-		mongoose.set('useNewUrlParser', true);
-		mongoose.set('useFindAndModify', false);
-		mongoose.set('useCreateIndex', true);
-		mongoose.set('useUnifiedTopology', true);
-		await mongoose.connect(process.env.MONGO_URL, mongoOptions);
-		console.log('Connected to MongoDB.');
-	} catch (err) {
-		console.log(err);
-		process.exit(-1);
-	}
 
 	app.get('*', async (req, res) => {
 		res.render('base.pug');
@@ -45,8 +31,9 @@ const setupServer = async () => {
 	} else {
 		server = http.createServer(app);
 		const io = socketIO(server);
+		io.redisClient = redisClient;
 		require('./io-handler')(io);
-		server.listen(process.env.PORT, () => console.log(`King's Cup server listening on ${process.env.PORT}`));
+		server.listen(SERVER_PORT, () => console.log(`King's Cup server listening on ${SERVER_PORT}`));
 	}
 };
 
