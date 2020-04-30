@@ -4,5 +4,7 @@ html {
 *,
 *:before,
 *:after {
+	margin: 0px;
+	border: 0px;
 	box-sizing: inherit;
 }

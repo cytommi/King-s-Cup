@@ -1,51 +1,132 @@
-import React, { useContext, useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import { GlobalContext } from '../../context/Global';
-import EventTypes from '../../../../shared/EventTypes';
-
 const Form = () => {
-	const { socket } = useContext(GlobalContext);
-
 	const [ joinCode, setJoinCode ] = useState('');
 	const [ customCode, setCustomCode ] = useState('');
-
-	const onClickJoin = (ev) => {
+	const { user, setUser } = useContext(GlobalContext);
+	// const [ name, setName ] = useState('');
+	// const [ gender, setGender ] = useState('guy'); // 'guy' || 'chick'
+	const [ error, setError ] = useState('');
+	const history = useHistory();
+	const onClickJoin = async (ev) => {
 		ev.preventDefault();
-		socket.emit(EventTypes.client.JOIN_GAME, joinCode);
+		const res = await fetch(`${process.env.API_URL}/game/${joinCode}/${user.name}`, {
+			method: 'HEAD',
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': '*'
+			}
+		});
+		if (res.ok) {
+			setUser({
+				...user,
+				room: joinCode
+			});
+			history.push(`/game/${joinCode}`);
+		} else if (res.status === 404) {
+			setError(`Join Code: ${joinCode} does not exist`);
+		} else if (res.status === 409) {
+			setError(`Player name: ${user.name} already exists in game room. Try another name.`);
+		}
 	};
-	const onClickCreate = (ev) => {
+	const onClickCreate = async (ev) => {
 		ev.preventDefault();
-		socket.emit(EventTypes.client.CREATE_GAME, customCode);
+		const res = await fetch(`${process.env.API_URL}/game`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': '*'
+			},
+			body: JSON.stringify({ customCode })
+		});
+		if (res.ok) {
+			setUser({
+				...user,
+				room: customCode
+			});
+			history.push(`/game/${customCode}`);
+		} else {
+			const data = await res.json();
+			setError(data.error);
+		}
 	};
 
 	return (
-		<div className="forms-container">
-			<form className="game-option">
-				<h2>Create new game and play with friends</h2>
-				<input
-					name="custom-code"
-					type="text"
-					placeholder="custom code"
-					value={customCode}
-					onChange={(ev) => setCustomCode(ev.target.value)}
-				/>
-				<button id="create-game" onClick={onClickCreate}>
-					Create
-				</button>
-			</form>
-			<form className="game-option">
-				<h2>Join Code</h2>
-				<input
-					name="game-code"
-					type="text"
-					placeholder="join code"
-					value={joinCode}
-					onChange={(ev) => setJoinCode(ev.target.value)}
-				/>
-				<button id="join-game" onClick={onClickJoin}>
-					Join
-				</button>
-			</form>
-		</div>
+		<form>
+			<h1>{error}</h1>
+			<div className="container player-info-container">
+				<div className="name-input">
+					<label htmlFor="name">Name</label>
+					<input
+						name="name"
+						type="string"
+						value={user.name}
+						onChange={(ev) =>
+							setUser({
+								...user,
+								name: ev.target.value
+							})}
+					/>
+				</div>
+				<div className="gender-input">
+					<label>
+						<input
+							type="radio"
+							value="guy"
+							checked={user.gender === 'guy'}
+							onChange={(ev) =>
+								setUser({
+									...user,
+									gender: ev.target.value
+								})}
+						/>
+						Guy
+					</label>
+					<label>
+						<input
+							type="radio"
+							value="chick"
+							checked={user.gender === 'chick'}
+							onChange={(ev) =>
+								setUser({
+									...user,
+									gender: ev.target.value
+								})}
+						/>
+						Chick
+					</label>
+				</div>
+			</div>
+			<div className="container game-options-container">
+				<div className="game-option">
+					<h2>Create new game and play with friends</h2>
+					<input
+						name="custom-code"
+						type="text"
+						placeholder="custom code"
+						value={customCode}
+						onChange={(ev) => setCustomCode(ev.target.value)}
+					/>
+					<button id="create-game" onClick={onClickCreate}>
+						Create
+					</button>
+				</div>
+				<div className="game-option">
+					<h2>Join Code</h2>
+					<input
+						name="game-code"
+						type="text"
+						placeholder="join code"
+						value={joinCode}
+						onChange={(ev) => setJoinCode(ev.target.value)}
+					/>
+					<button id="join-game" onClick={onClickJoin}>
+						Join
+					</button>
+				</div>
+			</div>
+		</form>
 	);
 };
 

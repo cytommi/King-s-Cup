@@ -66,6 +66,7 @@ module.exports = {
 			chunkFilename: '[name].[contenthash].css'
 		}),
 		new HtmlWebpackPlugin({
+			base: '/',
 			template: `base.pug`,
 			filename: `base.pug`
 		}),
