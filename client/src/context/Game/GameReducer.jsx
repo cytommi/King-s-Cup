@@ -1,25 +1,27 @@
 import GameActions from './GameActions';
 
 const GameReducer = (state, action) => {
-	switch (action.type) {
-		case GameActions.setGame:
-			return {
-				...state,
-				...action.payload
-			};
+  switch (action.type) {
+    case GameActions.setGame:
+      return {
+        ...state,
+        ...action.payload,
+      };
 
-		case GameActions.setPlayers:
-			console.log('here', { payload: action.payload });
-			return {
-				...state,
-				players: action.payload
-			};
-		case GameActions.cardDrawn:
-			return state;
-		default:
-			console.log('wtf');
-			return state;
-	}
+    case GameActions.setPlayers:
+      return {
+        ...state,
+        players: action.payload,
+      };
+    case GameActions.setTopCard:
+      return {
+        ...state,
+        topCard: action.payload,
+      };
+
+    default:
+      throw new Error('Something wrong here in the Game Reducer');
+  }
 };
 
 export default GameReducer;

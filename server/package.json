@@ -6,6 +6,8 @@
   "author": "Thomas Wang <cytommi>",
   "license": "MIT",
   "scripts": {
+    "redis": "docker start kings-cup-redis",
+    "redis-a": "docker exec -it kings-cup-redis /bin/bash",
     "serve-watch": "npx nodemon src/server.js"
   },
   "dependencies": {
