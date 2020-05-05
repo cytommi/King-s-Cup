@@ -9,10 +9,12 @@ import GameButtons from './GameButtons';
 import Cards from './Cards';
 import '../../styling/game.scss';
 
+import Timer from './Timer';
+
 const Game = () => {
   const { roomcode } = useParams();
   const { user, socket } = useContext(GlobalContext);
-  const { setGame } = useContext(GameContext);
+  const { game, setGame, beginCountdown, setCache } = useContext(GameContext);
   const history = useHistory();
 
   if (roomcode !== user.room) {
@@ -62,7 +64,8 @@ const Game = () => {
     );
 
     socket.on(EventTypes.server.CARD_FLIPPED, ({ card, nextPlayerIndex }) => {
-      setGame({
+      beginCountdown();
+      setCache({
         currentPlayer: nextPlayerIndex,
         topCard: card,
       });
@@ -77,6 +80,7 @@ const Game = () => {
       <GamePlayers />
       <GameButtons />
       <Cards />
+      {game.showCountdown && <Timer seconds={3} />}
     </>
   );
 };

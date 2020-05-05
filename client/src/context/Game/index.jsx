@@ -12,6 +12,8 @@ const initialState = {
     val: 0,
     eventName: undefined,
   } /** cards are 1-indexed */,
+  showCountdown: false,
+  cache: undefined,
 };
 
 export const GameContext = createContext(initialState);
@@ -26,8 +28,42 @@ export const GameProvider = ({ children }) => {
     });
   };
 
+  const beginCountdown = () => {
+    dispatch({
+      type: GameActions.beginCountdown,
+    });
+  };
+
+  const endCountdown = () => {
+    dispatch({
+      type: GameActions.endCountdown,
+    });
+  };
+
+  const setCache = (gameState) => {
+    dispatch({
+      type: GameActions.setCache,
+      payload: gameState,
+    });
+  };
+
+  const updateGameFromCache = () => {
+    dispatch({
+      type: GameActions.updateGameFromCache,
+    });
+  };
+
   return (
-    <GameContext.Provider value={{ game, setGame }}>
+    <GameContext.Provider
+      value={{
+        game,
+        setGame,
+        beginCountdown,
+        endCountdown,
+        setCache,
+        updateGameFromCache,
+      }}
+    >
       {children}
     </GameContext.Provider>
   );

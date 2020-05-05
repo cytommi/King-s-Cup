@@ -8,15 +8,28 @@ const GameReducer = (state, action) => {
         ...action.payload,
       };
 
-    case GameActions.setPlayers:
+    case GameActions.beginCountdown:
       return {
         ...state,
-        players: action.payload,
+        showCountdown: true,
       };
-    case GameActions.setTopCard:
+    case GameActions.endCountdown:
       return {
         ...state,
-        topCard: action.payload,
+        showCountdown: false,
+      };
+
+    case GameActions.setCache:
+      return {
+        ...state,
+        cache: action.payload,
+      };
+
+    case GameActions.updateGameFromCache:
+      return {
+        ...state,
+        ...state.cache,
+        cache: undefined,
       };
 
     default:
