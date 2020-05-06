@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { GameContext } from '../../context/Game';
 
-const Timer = ({ seconds }) => {
+const Timer = () => {
   // initialize timeLeft with the seconds prop
-  const [timeLeft, setTimeLeft] = useState(seconds);
-  const { endCountdown, updateGameFromCache } = useContext(GameContext);
+  const { game, decCountdown, updateGameFromCache } = useContext(GameContext);
+  const { countdown } = game;
 
   useEffect(() => {
     // exit early when we reach 0
-    if (!timeLeft) {
-      endCountdown();
+    if (countdown === 0) {
       updateGameFromCache();
       return;
     }
@@ -17,7 +16,7 @@ const Timer = ({ seconds }) => {
     // save intervalId to clear the interval when the
     // component re-renders
     const intervalId = setInterval(() => {
-      setTimeLeft(timeLeft - 1);
+      decCountdown();
     }, 1000);
 
     // clear interval on re-render to avoid memory leaks
@@ -26,13 +25,9 @@ const Timer = ({ seconds }) => {
     };
     // add timeLeft as a dependency to re-rerun the effect
     // when we update it
-  }, [timeLeft]);
+  }, [countdown]);
 
-  return (
-    <div>
-      <h1>{timeLeft}</h1>
-    </div>
-  );
+  return <>{countdown > 0 && <h1>{countdown}</h1>}</>;
 };
 
 export default Timer;

@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "redis": "docker start kings-cup-redis",
-    "redis-a": "docker exec -it kings-cup-redis /bin/bash",
+    "redis-a": "docker exec -it kings-cup-redis /bin/bash ",
+    "redis-d": "docker stop kings-cup-redis",
     "serve-watch": "npx nodemon src/server.js"
   },
   "dependencies": {

@@ -12,7 +12,7 @@ module.exports = (app) => {
         -1
       );
       if (players.length > 0) {
-        if (players.includes(`${name}__M`, `${name}__F`)) {
+        if (players.includes(`${name}M`, `${name}F`)) {
           return res.status(409).send();
         } else return res.status(204).send();
       } else return res.status(404).send();
@@ -46,6 +46,11 @@ module.exports = (app) => {
 
       /** Initialize card deck */
       await app.redisClient.rpush(`${customCode}:cards`, ...CardDeck());
+
+      /** DELETE THIS */
+      for (let i = 13; i >= 1; --i)
+        await app.redisClient.lpush(`${customCode}:cards`, i);
+
       await app.redisClient.set(`${customCode}:currentPlayer`, 0);
       res.status(201).send();
     } catch (err) {
@@ -57,7 +62,7 @@ module.exports = (app) => {
   app.put("/api/game/:code", async (req, res) => {
     const { name, gender } = req.body;
     if (!name || !gender) return res.status(401).send();
-    const playerName = `${name}__${gender}`;
+    const playerName = `${name}${gender}`;
     const roomCode = req.params.code;
     try {
       let players = await app.redisClient.lrange(`${roomCode}:players`, 0, -1);

@@ -1,6 +1,7 @@
 import React, { createContext, useReducer, useState } from 'react';
 import GameActions from './GameActions';
 import GameReducer from './GameReducer';
+import Game from '../../components/Game';
 
 const initialState = {
   players: [],
@@ -12,8 +13,10 @@ const initialState = {
     val: 0,
     eventName: undefined,
   } /** cards are 1-indexed */,
-  showCountdown: false,
+  countdown: 0,
   cache: undefined,
+  drinkers: [],
+  mate: [],
 };
 
 export const GameContext = createContext(initialState);
@@ -28,9 +31,16 @@ export const GameProvider = ({ children }) => {
     });
   };
 
-  const beginCountdown = () => {
+  const beginCountdown = (secs) => {
     dispatch({
       type: GameActions.beginCountdown,
+      payload: secs,
+    });
+  };
+
+  const decCountdown = () => {
+    dispatch({
+      type: GameActions.decCountdown,
     });
   };
 
@@ -53,15 +63,23 @@ export const GameProvider = ({ children }) => {
     });
   };
 
+  const clearDrinkers = () => {
+    dispatch({
+      type: GameActions.clearDrinkers,
+    });
+  };
+
   return (
     <GameContext.Provider
       value={{
         game,
         setGame,
         beginCountdown,
+        decCountdown,
         endCountdown,
         setCache,
         updateGameFromCache,
+        clearDrinkers,
       }}
     >
       {children}

@@ -7,6 +7,7 @@ import GameEvent from './GameEvent';
 import GamePlayers from './GamePlayers';
 import GameButtons from './GameButtons';
 import Cards from './Cards';
+import Drinkers from './Drinkers';
 import '../../styling/game.scss';
 
 import Timer from './Timer';
@@ -14,13 +15,20 @@ import Timer from './Timer';
 const Game = () => {
   const { roomcode } = useParams();
   const { user, socket } = useContext(GlobalContext);
-  const { game, setGame, beginCountdown, setCache } = useContext(GameContext);
+  const {
+    setGame,
+    beginCountdown,
+    setCache,
+    updateGameFromCache,
+    clearDrinkers,
+  } = useContext(GameContext);
   const history = useHistory();
 
   if (roomcode !== user.room) {
     return <Redirect to="/"></Redirect>;
   }
   useEffect(() => {
+    console.log('INDEX RERENDER');
     const joinSocket = async () => {
       const res = await fetch(`${process.env.API_URL}/game/${roomcode}`, {
         method: 'PUT',
@@ -62,13 +70,25 @@ const Game = () => {
         });
       }
     );
+    socket.on(EventTypes.server.BROADCAST.DRINKERS, (drinkers) => {
+      console.log({ drinkers });
+      setGame({
+        drinkers,
+      });
+    });
 
     socket.on(EventTypes.server.CARD_FLIPPED, ({ card, nextPlayerIndex }) => {
-      beginCountdown();
+      clearDrinkers();
+      beginCountdown(3);
+      setGame({
+        currentPlayer: -1,
+      });
       setCache({
         currentPlayer: nextPlayerIndex,
         topCard: card,
       });
+      /** comment this out */
+      updateGameFromCache();
     });
 
     joinSocket();
@@ -80,7 +100,8 @@ const Game = () => {
       <GamePlayers />
       <GameButtons />
       <Cards />
-      {game.showCountdown && <Timer seconds={3} />}
+      <Drinkers />
+      {/* <Timer /> */}
     </>
   );
 };

@@ -9,6 +9,7 @@ module.exports = {
     BROADCAST: {
       NEW_MEMBER: "broadcast-new-member",
       DELETE_MEMBER: "broadcast-delete-member",
+      DRINKERS: "broadcast-drinkers",
     },
     ERROR: {
       INVALID_JOIN_CODE: "error-invalid-join-code",

@@ -5,7 +5,6 @@ const { CardDeck } = require("./utilities");
 module.exports = (app) => {
   app.io.on("connection", (socket) => {
     console.log("Client connected");
-
     socket.on(EventTypes.client.JOIN_GAME, async ({ name, room, gender }) => {
       socket.join(room);
       socket.customInfo = {
@@ -13,6 +12,7 @@ module.exports = (app) => {
         name,
         gender,
       };
+      console.log(`${name}${gender} just joined ${room}`);
 
       try {
         const players = await app.redisClient.lrange(`${room}:players`, 0, -1);
@@ -44,22 +44,89 @@ module.exports = (app) => {
           nextPlayerIndex,
         });
 
-        /** Game Event handling */
-        // const card = getCard(nextTopCard);
-        // switch (card.val) {
-        //   case 1:
-        //     app.io.in(room).emit(EventTypes.game[1]);
-        //   case 2:
-        //     app.io.in
-        // }
+        const card = getCard(nextTopCard);
+        const players = await app.redisClient.lrange(`${room}:players`, 0, -1);
+        switch (card.val) {
+          case 5:
+            const guys = players.filter((player) => player.slice(-1) === "M");
+            app.io.in(room).emit(EventTypes.server.BROADCAST.DRINKERS, guys);
+            break;
+          case 6:
+            const chicks = players.filter((player) => player.slice(-1) === "F");
+            app.io.in(room).emit(EventTypes.server.BROADCAST.DRINKERS, chicks);
+            break;
+        }
       } catch (err) {
         console.log(err);
       }
     });
 
+    /** Game Event handling */
+    socket.on(EventTypes.game[2], ({ user }) => {
+      const name = `${user.name}${user.gender}`;
+      app.io
+        .in(socket.customInfo.room)
+        .emit(EventTypes.server.BROADCAST.DRINKERS, [name]);
+    });
+
+    socket.on(EventTypes.game[3], ({ user }) => {
+      const name = `${user.name}${user.gender}`;
+      app.io
+        .in(socket.customInfo.room)
+        .emit(EventTypes.server.BROADCAST.DRINKERS, [name]);
+    });
+
+    socket.on(EventTypes.game[4], async ({ user }) => {
+      const name = `${user.name}${user.gender}`;
+      const numPlayers = await app.redisClient.llen(
+        `${socket.customInfo.room}:players`
+      );
+      await app.redisClient.lpush(`${socket.customInfo.room}:responses`, name);
+      const numResponses = await app.redisClient.llen(
+        `${socket.customInfo.room}:responses`
+      );
+
+      if (numResponses === numPlayers) {
+        const drinker = await app.redisClient.lpop(
+          `${socket.customInfo.room}:responses`
+        );
+        app.io
+          .in(socket.customInfo.room)
+          .emit(EventTypes.server.BROADCAST.DRINKERS, [drinker]);
+        await app.redisClient.del(`${socket.customInfo.room}:responses`);
+      }
+    });
+
+    socket.on(EventTypes.game[7], async ({ user }) => {
+      const name = `${user.name}${user.gender}`;
+      const numPlayers = await app.redisClient.llen(
+        `${socket.customInfo.room}:players`
+      );
+      await app.redisClient.lpush(`${socket.customInfo.room}:responses`, name);
+      const numResponses = await app.redisClient.llen(
+        `${socket.customInfo.room}:responses`
+      );
+
+      if (numResponses === numPlayers) {
+        const drinker = await app.redisClient.lpop(
+          `${socket.customInfo.room}:responses`
+        );
+        app.io
+          .in(socket.customInfo.room)
+          .emit(EventTypes.server.BROADCAST.DRINKERS, [drinker]);
+        await app.redisClient.del(`${socket.customInfo.room}:responses`);
+      }
+    });
+
+    // socket.on(EventTypes.game[8], async ({ user }) => {
+    //   const userMates = await app.redisClient.hmget(`${socket.customInfo.room}:mates`, `${user.name}${user.gender}`);
+    //   await app.redisClient.hmset(`${socket.customInfo.room}:mates`, [user, ])
+    // });
+
     socket.on("disconnect", async () => {
+      console.log("Client disconnected");
       try {
-        const disconnectedPlayerName = `${socket.customInfo.name}__${socket.customInfo.gender}`;
+        const disconnectedPlayerName = `${socket.customInfo.name}${socket.customInfo.gender}`;
         const originalPlayers = await app.redisClient.lrange(
           `${socket.customInfo.room}:players`,
           0,

@@ -11,12 +11,17 @@ const GameReducer = (state, action) => {
     case GameActions.beginCountdown:
       return {
         ...state,
-        showCountdown: true,
+        countdown: action.payload,
+      };
+    case GameActions.decCountdown:
+      return {
+        ...state,
+        countdown: state.countdown - 1,
       };
     case GameActions.endCountdown:
       return {
         ...state,
-        showCountdown: false,
+        countdown: 0,
       };
 
     case GameActions.setCache:
@@ -30,6 +35,11 @@ const GameReducer = (state, action) => {
         ...state,
         ...state.cache,
         cache: undefined,
+      };
+    case GameActions.clearDrinkers:
+      return {
+        ...state,
+        drinkers: [],
       };
 
     default:

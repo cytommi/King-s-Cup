@@ -1,6 +1,5 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import io from 'socket.io-client';
-const socket = io(process.env.SERVER_URL);
 
 export const GlobalContext = createContext();
 export const GlobalProvider = ({ children }) => {
@@ -10,7 +9,8 @@ export const GlobalProvider = ({ children }) => {
     room: '', // Room name for game
   });
 
-  // const socket = Socket();
+  const socket = io(process.env.SERVER_URL);
+
   return (
     <GlobalContext.Provider value={{ socket, user, setUser }}>
       {children}

@@ -7,21 +7,33 @@ const GameButtons = () => {
   const { game } = useContext(GameContext);
 
   const isMyTurn = () =>
-    game.players[game.currentPlayer] === `${user.name}__${user.gender}`;
+    game.players[game.currentPlayer] === `${user.name}${user.gender}`;
 
-  const isFloor = () => game.topCard.val === 4;
+  const showReactionButton = (cardVal) => game.topCard.val === cardVal;
 
-  const isHeaven = () => game.topCard.val === 7;
+  const onClickReactionButton = (cardVal) => (ev) => {
+    ev.preventDefault();
+    console.log('I clicked, emitting my name');
+    socket.emit(EventTypes.game[cardVal], { user });
+  };
 
   const onClickFlipCard = () => {
     socket.emit(EventTypes.client.FLIP_CARD, { room: user.room });
   };
   return (
     <>
-      <button id="heaven" disabled={!isHeaven()}>
+      <button
+        id="heaven"
+        disabled={!showReactionButton(7)}
+        onClick={onClickReactionButton(7)}
+      >
         Heaven
       </button>
-      <button id="floor" disabled={!isFloor()}>
+      <button
+        id="floor"
+        disabled={!showReactionButton(4)}
+        onClick={onClickReactionButton(4)}
+      >
         Floor
       </button>
       <button id="flip-card" onClick={onClickFlipCard} disabled={!isMyTurn()}>

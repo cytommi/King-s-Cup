@@ -6,7 +6,7 @@
 	"author": "Thomas Wang <cytommi>",
 	"license": "MIT",
 	"scripts": {
-		"serve:dev-watch": "webpack-dev-server --config ./webpack.config.js --env dev --mode development -w",
+		"build:dev": "webpack --env dev",
 		"build:dev-watch": "webpack --env dev -w"
 	},
 	"devDependencies": {
