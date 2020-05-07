@@ -41,7 +41,11 @@ const GameReducer = (state, action) => {
         ...state,
         drinkers: [],
       };
-
+    case GameActions.addMate:
+      return {
+        ...state,
+        mates: [...state.mates, action.payload],
+      };
     default:
       throw new Error('Something wrong here in the Game Reducer');
   }

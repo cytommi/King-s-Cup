@@ -28,7 +28,6 @@ const Game = () => {
     return <Redirect to="/"></Redirect>;
   }
   useEffect(() => {
-    console.log('INDEX RERENDER');
     const joinSocket = async () => {
       const res = await fetch(`${process.env.API_URL}/game/${roomcode}`, {
         method: 'PUT',
@@ -63,7 +62,6 @@ const Game = () => {
     socket.on(
       EventTypes.server.BROADCAST.DELETE_MEMBER,
       ({ players, currentPlayer }) => {
-        console.log({ players, currentPlayer });
         setGame({
           players,
           currentPlayer,
@@ -71,7 +69,6 @@ const Game = () => {
       }
     );
     socket.on(EventTypes.server.BROADCAST.DRINKERS, (drinkers) => {
-      console.log({ drinkers });
       setGame({
         drinkers,
       });
@@ -92,6 +89,7 @@ const Game = () => {
     });
 
     joinSocket();
+    return () => socket.emit(EventTypes.client.LEAVE_GAME);
   }, []);
 
   return (

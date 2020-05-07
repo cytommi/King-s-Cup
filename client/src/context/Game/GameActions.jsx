@@ -6,4 +6,5 @@ export default {
   decCountdown: 'DEC_COUNTDOWN',
   endCountdown: 'END_COUNTDOWN',
   clearDrinkers: 'CLEAR_DRINKERS',
+  addMate: 'ADD_MATE',
 };

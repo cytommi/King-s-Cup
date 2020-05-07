@@ -118,12 +118,7 @@ module.exports = (app) => {
       }
     });
 
-    // socket.on(EventTypes.game[8], async ({ user }) => {
-    //   const userMates = await app.redisClient.hmget(`${socket.customInfo.room}:mates`, `${user.name}${user.gender}`);
-    //   await app.redisClient.hmset(`${socket.customInfo.room}:mates`, [user, ])
-    // });
-
-    socket.on("disconnect", async () => {
+    const onClientLeaveRoom = async () => {
       console.log("Client disconnected");
       try {
         const disconnectedPlayerName = `${socket.customInfo.name}${socket.customInfo.gender}`;
@@ -175,6 +170,8 @@ module.exports = (app) => {
       } catch (err) {
         console.log(err);
       }
-    });
+    };
+    socket.on(EventTypes.client.LEAVE_GAME, onClientLeaveRoom);
+    socket.on("disconnect", onClientLeaveRoom);
   });
 };

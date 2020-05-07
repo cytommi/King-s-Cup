@@ -27,3 +27,5 @@ dist
 .lock-wscript
 
 .env*
+
+*_Store

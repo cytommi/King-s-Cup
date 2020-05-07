@@ -1,7 +1,6 @@
 import React, { createContext, useReducer, useState } from 'react';
 import GameActions from './GameActions';
 import GameReducer from './GameReducer';
-import Game from '../../components/Game';
 
 const initialState = {
   players: [],
@@ -16,7 +15,7 @@ const initialState = {
   countdown: 0,
   cache: undefined,
   drinkers: [],
-  mate: [],
+  mates: [],
 };
 
 export const GameContext = createContext(initialState);
@@ -68,7 +67,12 @@ export const GameProvider = ({ children }) => {
       type: GameActions.clearDrinkers,
     });
   };
-
+  const addMate = (name) => {
+    dispatch({
+      type: GameActions.addMate,
+      payload: name,
+    });
+  };
   return (
     <GameContext.Provider
       value={{
@@ -80,6 +84,7 @@ export const GameProvider = ({ children }) => {
         setCache,
         updateGameFromCache,
         clearDrinkers,
+        addMate,
       }}
     >
       {children}

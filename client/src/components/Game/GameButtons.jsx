@@ -6,20 +6,13 @@ const GameButtons = () => {
   const { socket, user } = useContext(GlobalContext);
   const { game } = useContext(GameContext);
 
-  const isMyTurn = () =>
-    game.players[game.currentPlayer] === `${user.name}${user.gender}`;
-
   const showReactionButton = (cardVal) => game.topCard.val === cardVal;
 
   const onClickReactionButton = (cardVal) => (ev) => {
     ev.preventDefault();
-    console.log('I clicked, emitting my name');
     socket.emit(EventTypes.game[cardVal], { user });
   };
 
-  const onClickFlipCard = () => {
-    socket.emit(EventTypes.client.FLIP_CARD, { room: user.room });
-  };
   return (
     <>
       <button
@@ -35,9 +28,6 @@ const GameButtons = () => {
         onClick={onClickReactionButton(4)}
       >
         Floor
-      </button>
-      <button id="flip-card" onClick={onClickFlipCard} disabled={!isMyTurn()}>
-        Flip Card
       </button>
     </>
   );
