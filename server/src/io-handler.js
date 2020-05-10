@@ -165,6 +165,7 @@ module.exports = (app) => {
         } else {
           await app.redisClient.del(`${socket.customInfo.room}:cards`);
           await app.redisClient.del(`${socket.customInfo.room}:currentPlayer`);
+          await app.redisClient.del(`${socket.customInfo.room}:responses`);
           console.log(`Closed room: ${socket.customInfo.room}`);
         }
       } catch (err) {

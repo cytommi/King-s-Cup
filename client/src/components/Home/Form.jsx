@@ -7,6 +7,7 @@ const Form = () => {
   const { user, setUser } = useContext(GlobalContext);
   const [error, setError] = useState('');
   const history = useHistory();
+
   const joinButtonDisabled = () => {
     return !(user.name && joinCode);
   };
@@ -63,17 +64,18 @@ const Form = () => {
   };
 
   return (
-    <form>
+    <>
+      {' '}
       <h1>{error}</h1>
-      <div id="grid-container">
-        <div id="user-info">
-          <h2 id="info-header">Enter Your Info</h2>
+      <form>
+        <div id="user-info" className="flex-item">
+          <h2 id="info-header">PLAYER INFO</h2>
           <div id="name-input" className="player-info">
             <input
               name="name"
               type="text"
               value={user.name}
-              placeholder="your player name"
+              placeholder="my name"
               onChange={(ev) =>
                 setUser({
                   ...user,
@@ -82,77 +84,80 @@ const Form = () => {
               }
             />
           </div>
-          <div id="gender-input" className="player-info">
+          <div id="gender-input">
             <label htmlFor="gender-iuput">I am a: </label>
-            <label>
-              <input
-                type="radio"
-                value="M"
-                checked={user.gender === 'M'}
-                onChange={(ev) =>
-                  setUser({
-                    ...user,
-                    gender: ev.target.value,
-                  })
-                }
-              />
-              Guy
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="F"
-                checked={user.gender === 'F'}
-                onChange={(ev) =>
-                  setUser({
-                    ...user,
-                    gender: ev.target.value,
-                  })
-                }
-              />
-              Chick
-            </label>
+            <div className="M-option gender-input">
+              <label>
+                <input
+                  type="radio"
+                  value="M"
+                  checked={user.gender === 'M'}
+                  onChange={(ev) =>
+                    setUser({
+                      ...user,
+                      gender: ev.target.value,
+                    })
+                  }
+                />
+                Guy
+              </label>
+            </div>
+            <div className="F-option gender-input">
+              <label>
+                <input
+                  type="radio"
+                  value="F"
+                  checked={user.gender === 'F'}
+                  onChange={(ev) =>
+                    setUser({
+                      ...user,
+                      gender: ev.target.value,
+                    })
+                  }
+                />
+                Chick
+              </label>
+            </div>
           </div>
         </div>
-        <div id="game-options">
-          <div id="create-game" className="game-option">
-            <h2>Create a new game</h2>
-            <input
-              name="custom-code"
-              type="text"
-              placeholder="custom code"
-              value={customCode}
-              onChange={(ev) => setCustomCode(ev.target.value)}
-            />
-            <button
-              id="create-game"
-              onClick={onClickCreate}
-              disabled={createButtonDisabled()}
-            >
-              Create
-            </button>
-          </div>
 
-          <div id="join-game" className="game-option">
-            <h2>Or join with existing room code</h2>
-            <input
-              name="game-code"
-              type="text"
-              placeholder="join code"
-              value={joinCode}
-              onChange={(ev) => setJoinCode(ev.target.value)}
-            />
-            <button
-              id="join-game"
-              onClick={onClickJoin}
-              disabled={joinButtonDisabled()}
-            >
-              Join
-            </button>
-          </div>
+        <div id="create-game" className="flex-item game-option">
+          <h2>CREATE A NEW GAME</h2>
+          <input
+            name="custom-code"
+            type="text"
+            placeholder="custom code"
+            value={customCode}
+            onChange={(ev) => setCustomCode(ev.target.value)}
+          />
+          <button
+            id="create-game-button"
+            onClick={onClickCreate}
+            disabled={createButtonDisabled()}
+          >
+            CREATE
+          </button>
         </div>
-      </div>
-    </form>
+
+        <div id="join-game" className="flex-item game-option">
+          <h2>OR JOIN EXISTING ROOM WITH CODE</h2>
+          <input
+            name="game-code"
+            type="text"
+            placeholder="join code"
+            value={joinCode}
+            onChange={(ev) => setJoinCode(ev.target.value)}
+          />
+          <button
+            id="join-game-button"
+            onClick={onClickJoin}
+            disabled={joinButtonDisabled()}
+          >
+            JOIN
+          </button>
+        </div>
+      </form>
+    </>
   );
 };
 
