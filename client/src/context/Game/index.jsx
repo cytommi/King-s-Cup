@@ -16,6 +16,7 @@ const initialState = {
   cache: undefined,
   drinkers: [],
   mates: [],
+  showMateForm: false,
 };
 
 export const GameContext = createContext(initialState);

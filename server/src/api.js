@@ -37,7 +37,7 @@ module.exports = (app) => {
       );
       if (players.length > 0) {
         return res.status(409).send({
-          error: `Attempt to create room with existing code: ${customCode}`,
+          error: `Room code: ${customCode} already exists. Try another code.`,
         });
       }
 
@@ -48,8 +48,8 @@ module.exports = (app) => {
       await app.redisClient.rpush(`${customCode}:cards`, ...CardDeck());
 
       /** DELETE THIS */
-      for (let i = 13; i >= 1; --i)
-        await app.redisClient.lpush(`${customCode}:cards`, i);
+      // for (let i = 13; i >= 1; --i)
+      //   await app.redisClient.lpush(`${customCode}:cards`, i);
 
       await app.redisClient.set(`${customCode}:currentPlayer`, 0);
       res.status(201).send();

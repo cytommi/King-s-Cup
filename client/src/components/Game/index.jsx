@@ -3,18 +3,19 @@ import { useHistory, useParams, Redirect } from 'react-router-dom';
 import { GlobalContext } from '../../context/Global';
 import { GameContext } from '../../context/Game';
 import EventTypes from '../../../../shared/EventTypes';
-import GameEvent from './GameEvent';
+import TopNav from './TopNav';
 import GamePlayers from './GamePlayers';
-import GameButtons from './GameButtons';
+import Mates from './Mates';
+import { Heaven, Floor } from './GameButtons';
 import Cards from './Cards';
-import Drinkers from './Drinkers';
-import '../../styling/game.scss';
-
+import Popup from './Popup';
+import MateForm from './MateForm';
 import Timer from './Timer';
+import '../../styling/game/base.scss';
 
 const Game = () => {
   const { roomcode } = useParams();
-  const { user, socket } = useContext(GlobalContext);
+  const { user, socket, resetUser } = useContext(GlobalContext);
   const {
     setGame,
     beginCountdown,
@@ -85,21 +86,29 @@ const Game = () => {
         topCard: card,
       });
       /** comment this out */
-      updateGameFromCache();
+      // updateGameFromCache();
     });
 
     joinSocket();
-    return () => socket.emit(EventTypes.client.LEAVE_GAME);
+    return () => {
+      socket.emit(EventTypes.client.LEAVE_GAME);
+      resetUser();
+    };
   }, []);
 
   return (
     <>
-      <GameEvent />
-      <GamePlayers />
-      <GameButtons />
-      <Cards />
-      <Drinkers />
-      {/* <Timer /> */}
+      <div id="game">
+        <TopNav />
+        <Heaven />
+        <Cards />
+        <Floor />
+        <GamePlayers />
+        <Mates />
+        <Timer />
+      </div>
+      <MateForm />
+      <Popup />
     </>
   );
 };

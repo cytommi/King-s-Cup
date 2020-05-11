@@ -1,36 +1,51 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { GlobalContext } from '../../context/Global';
 import { GameContext } from '../../context/Game';
 import EventTypes from '../../../../shared/EventTypes';
-const GameButtons = () => {
+import '../../styling/game/reactionButton.scss';
+
+export const Heaven = () => {
   const { socket, user } = useContext(GlobalContext);
   const { game } = useContext(GameContext);
-
-  const showReactionButton = (cardVal) => game.topCard.val === cardVal;
-
-  const onClickReactionButton = (cardVal) => (ev) => {
+  const buttonRef = useRef();
+  const showButton = () => game.topCard.val === 7;
+  const onClick = (ev) => {
     ev.preventDefault();
-    socket.emit(EventTypes.game[cardVal], { user });
+    socket.emit(EventTypes.game[7], { user });
+    buttonRef.current.disabled = true;
   };
-
   return (
-    <>
-      <button
-        id="heaven"
-        disabled={!showReactionButton(7)}
-        onClick={onClickReactionButton(7)}
-      >
-        Heaven
-      </button>
-      <button
-        id="floor"
-        disabled={!showReactionButton(4)}
-        onClick={onClickReactionButton(4)}
-      >
-        Floor
-      </button>
-    </>
+    <button
+      ref={buttonRef}
+      id="heaven-button"
+      className="reaction-button"
+      disabled={!showButton()}
+      onClick={onClick}
+    >
+      HEAVEN
+    </button>
   );
 };
 
-export default GameButtons;
+export const Floor = () => {
+  const { socket, user } = useContext(GlobalContext);
+  const { game } = useContext(GameContext);
+  const buttonRef = useRef();
+  const showButton = () => game.topCard.val === 4;
+  const onClick = (ev) => {
+    ev.preventDefault();
+    socket.emit(EventTypes.game[4], { user });
+    buttonRef.current.disabled = true;
+  };
+  return (
+    <button
+      ref={buttonRef}
+      id="floor-button"
+      className="reaction-button"
+      disabled={!showButton()}
+      onClick={onClick}
+    >
+      FLOOR
+    </button>
+  );
+};

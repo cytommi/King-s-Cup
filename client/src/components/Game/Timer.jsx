@@ -1,16 +1,22 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useRef } from 'react';
 import { GameContext } from '../../context/Game';
+import '../../styling/game/timer.scss';
 
 const Timer = () => {
   // initialize timeLeft with the seconds prop
   const { game, decCountdown, updateGameFromCache } = useContext(GameContext);
   const { countdown } = game;
+  const timerRef = useRef();
 
   useEffect(() => {
     // exit early when we reach 0
     if (countdown === 0) {
+      timerRef.current.style.zIndex = -1;
       updateGameFromCache();
       return;
+    }
+    if (countdown > 0) {
+      timerRef.current.style.zIndex = 1000;
     }
 
     // save intervalId to clear the interval when the
@@ -27,7 +33,13 @@ const Timer = () => {
     // when we update it
   }, [countdown]);
 
-  return <>{countdown > 0 && <h1>{countdown}</h1>}</>;
+  return (
+    <div ref={timerRef} id="timer">
+      {countdown > 0 && (
+        <h1 className={`countdown __${countdown}`}>{countdown}</h1>
+      )}
+    </div>
+  );
 };
 
 export default Timer;

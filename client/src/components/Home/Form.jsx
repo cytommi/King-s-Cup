@@ -65,8 +65,6 @@ const Form = () => {
 
   return (
     <>
-      {' '}
-      <h1>{error}</h1>
       <form>
         <div id="user-info" className="flex-item">
           <h2 id="info-header">PLAYER INFO</h2>
@@ -157,6 +155,7 @@ const Form = () => {
           </button>
         </div>
       </form>
+      <h1 id="error-msg">{error}</h1>
     </>
   );
 };

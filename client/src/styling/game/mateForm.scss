@@ -1,0 +1,69 @@
+@use '../colors';
+#mate-form {
+  z-index: 5;
+  position: fixed;
+  top: 20vh;
+  left: 30vw;
+  width: 40vw;
+  min-height: 200px;
+
+  background-color: colors.$secondary_0;
+  animation: fade-in 1s;
+  font-family: 'oswald', sans-serif;
+  background-color: colors.$success_0;
+  border-radius: 3.5em;
+  padding: 1em 3em;
+  margin: 1.5em;
+  box-shadow: 4px 6px 6px colors.$main_-2;
+  border: 5px solid colors.$form_highlight;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  #mate-list {
+    background-color: colors.$success_0;
+    box-shadow: 4px 2px 4px colors.$main_-2;
+    border-radius: 0.7em;
+    border: 3px solid colors.$form_highlight;
+    padding: 1em 0.3em;
+
+    ul {
+      padding-left: 0;
+      list-style-type: none;
+      li {
+        margin-left: 1em;
+        font-size: 20px;
+      }
+    }
+    .M {
+      color: colors.$male;
+    }
+    .F {
+      color: colors.$female;
+    }
+  }
+  @media only screen and (max-width: 500px) {
+    bottom: 5px;
+    left: 5px;
+    #players-list {
+      border-radius: 0.5em;
+      padding: 0.3em;
+      ul {
+        li {
+          margin-left: 0;
+        }
+      }
+    }
+    h2 {
+      font-size: 25px;
+    }
+  }
+}
+@keyframes fade-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,27 @@
+@use '../colors';
+
+button {
+  &.reaction-button {
+    padding: 20px;
+    border-radius: 20px;
+    margin: 15px;
+    font-family: 'Short Stack', cursive;
+    font-size: 3vw;
+    @media only screen and (max-width: 1000px) {
+      font-size: 30px;
+    }
+    &:enabled {
+      cursor: pointer;
+    }
+  }
+}
+
+#heaven-button:enabled {
+  background-color: colors.$secondary_2;
+  color: colors.$secondary_-2;
+}
+
+#floor-button:enabled {
+  background-color: orange;
+  color: colors.$alert_1;
+}

@@ -1,0 +1,26 @@
+@use '../colors';
+#timer {
+  //   z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  h1 {
+    &.__3 {
+      color: colors.$success_0;
+      font-size: 40vw;
+    }
+    &.__2 {
+      color: colors.$success_1;
+      font-size: 40vw;
+    }
+    &.__1 {
+      color: colors.$success_2;
+      font-size: 40vw;
+    }
+  }
+}

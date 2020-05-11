@@ -169,7 +169,7 @@ module.exports = (app) => {
           console.log(`Closed room: ${socket.customInfo.room}`);
         }
       } catch (err) {
-        console.log(err);
+        console.log("ERROR");
       }
     };
     socket.on(EventTypes.client.LEAVE_GAME, onClientLeaveRoom);
