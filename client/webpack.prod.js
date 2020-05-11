@@ -64,7 +64,7 @@ module.exports = {
     sourceMapFilename: '[name].js.map',
   },
   plugins: [
-    new Dotenv({ path: path.join(__dirname, `.env.development`) }),
+    new Dotenv({ path: path.join(__dirname, `.env.production`) }),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].[contenthash].css',
