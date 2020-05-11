@@ -28,7 +28,7 @@ module.exports = {
         enforce: 'pre',
       },
       {
-        test: /\.(jpg|png)$/,
+        test: /\.(jpg|png|svg)$/,
         use: {
           loader: 'url-loader',
         },
@@ -64,7 +64,7 @@ module.exports = {
     sourceMapFilename: '[name].js.map',
   },
   plugins: [
-    new Dotenv({ path: path.join(__dirname, `.env.production`) }),
+    new Dotenv({ path: path.join(__dirname, `.env.development`) }),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].[contenthash].css',
