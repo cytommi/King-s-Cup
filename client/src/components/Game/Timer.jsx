@@ -4,7 +4,12 @@ import '../../styling/game/timer.scss';
 
 const Timer = () => {
   // initialize timeLeft with the seconds prop
-  const { game, decCountdown, updateGameFromCache } = useContext(GameContext);
+  const {
+    game,
+    decCountdown,
+    updateGameFromCache,
+    setShowDrinkers,
+  } = useContext(GameContext);
   const { countdown } = game;
   const timerRef = useRef();
 
@@ -13,6 +18,7 @@ const Timer = () => {
     if (countdown === 0) {
       timerRef.current.style.zIndex = -1;
       updateGameFromCache();
+      setShowDrinkers(true);
       return;
     }
     if (countdown > 0) {

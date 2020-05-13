@@ -3,6 +3,10 @@ const { getCard } = require("../../shared/Utilities");
 const { CardDeck } = require("./utilities");
 
 module.exports = (app) => {
+  app.io.getNumSocketsInRoom = async (roomName) => {
+    return app.redisClient.llen(`${roomName}:players`);
+  };
+
   app.io.on("connection", (socket) => {
     console.log("Client connected");
     socket.on(EventTypes.client.JOIN_GAME, async ({ name, room, gender }) => {
@@ -47,13 +51,53 @@ module.exports = (app) => {
         const card = getCard(nextTopCard);
         const players = await app.redisClient.lrange(`${room}:players`, 0, -1);
         switch (card.val) {
+          case 1:
+            setTimeout(async () => {
+              await app.redisClient.set(
+                `${socket.customInfo.room}:expectedResponses`,
+                await app.io.getNumSocketsInRoom(`${socket.customInfo.room}`)
+              );
+
+              await app.io
+                .in(room)
+                .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+                  header: `WATERFALL`,
+                  bodyType: "String",
+                  body: `You don't stop chugging until the person left to you has stopped!`,
+                });
+            }, 3750);
+
+            break;
+
           case 5:
             const guys = players.filter((player) => player.slice(-1) === "M");
-            app.io.in(room).emit(EventTypes.server.BROADCAST.DRINKERS, guys);
+            setTimeout(async () => {
+              await app.redisClient.set(
+                `${socket.customInfo.room}:expectedResponses`,
+                await app.io.getNumSocketsInRoom(socket.customInfo.room)
+              );
+              app.io.in(room).emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+                header: `5 GUYS... DRINK UP BOIZ!`,
+                bodyType: "Array",
+                body: guys,
+              });
+            }, 3750);
+
             break;
           case 6:
             const chicks = players.filter((player) => player.slice(-1) === "F");
-            app.io.in(room).emit(EventTypes.server.BROADCAST.DRINKERS, chicks);
+            setTimeout(async () => {
+              await app.redisClient.set(
+                `${socket.customInfo.room}:expectedResponses`,
+                await app.io.getNumSocketsInRoom(socket.customInfo.room)
+              );
+              app.io.in(room).emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+                header: `6 CHICKS... DRINK UP GURLZ!`,
+                bodyType: "Array",
+                body: chicks,
+              });
+            }, 3750);
+
             break;
         }
       } catch (err) {
@@ -62,18 +106,32 @@ module.exports = (app) => {
     });
 
     /** Game Event handling */
-    socket.on(EventTypes.game[2], ({ user }) => {
-      const name = `${user.name}${user.gender}`;
+    socket.on(EventTypes.game[2], async ({ drinker }) => {
+      await app.redisClient.set(
+        `${socket.customInfo.room}:expectedResponses`,
+        await app.io.getNumSocketsInRoom(socket.customInfo.room)
+      );
       app.io
         .in(socket.customInfo.room)
-        .emit(EventTypes.server.BROADCAST.DRINKERS, [name]);
+        .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+          header: `We have a victim!`,
+          bodyType: "String",
+          body: `${socket.customInfo.name} just picked ${drinker} to drink for this round.`,
+        });
     });
 
-    socket.on(EventTypes.game[3], ({ user }) => {
-      const name = `${user.name}${user.gender}`;
+    socket.on(EventTypes.game[3], async ({ user }) => {
+      await app.redisClient.set(
+        `${socket.customInfo.room}:expectedResponses`,
+        await app.io.getNumSocketsInRoom(socket.customInfo.room)
+      );
       app.io
         .in(socket.customInfo.room)
-        .emit(EventTypes.server.BROADCAST.DRINKERS, [name]);
+        .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+          header: `You did this to yourself.`,
+          bodyType: `String`,
+          body: `So unlucky, ${user.name}. Drink.`,
+        });
     });
 
     socket.on(EventTypes.game[4], async ({ user }) => {
@@ -87,13 +145,20 @@ module.exports = (app) => {
       );
 
       if (numResponses === numPlayers) {
-        const drinker = await app.redisClient.lpop(
-          `${socket.customInfo.room}:responses`
-        );
-        app.io
-          .in(socket.customInfo.room)
-          .emit(EventTypes.server.BROADCAST.DRINKERS, [drinker]);
-        await app.redisClient.del(`${socket.customInfo.room}:responses`);
+        setTimeout(async () => {
+          await app.redisClient.set(
+            `${socket.customInfo.room}:expectedResponses`,
+            await app.io.getNumSocketsInRoom(socket.customInfo.room)
+          );
+          app.io
+            .in(socket.customInfo.room)
+            .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+              header: `Drink your part, ${socket.customInfo.name}`,
+              bodyType: "String",
+              body: `You're just too slow. `,
+            });
+          await app.redisClient.del(`${socket.customInfo.room}:responses`);
+        }, 750);
       }
     });
 
@@ -108,13 +173,111 @@ module.exports = (app) => {
       );
 
       if (numResponses === numPlayers) {
-        const drinker = await app.redisClient.lpop(
-          `${socket.customInfo.room}:responses`
-        );
+        setTimeout(async () => {
+          await app.redisClient.set(
+            `${socket.customInfo.room}:expectedResponses`,
+            await app.io.getNumSocketsInRoom(socket.customInfo.room)
+          );
+          app.io
+            .in(socket.customInfo.room)
+            .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+              header: `DRINK, ${socket.customInfo.name}`,
+              bodyType: `String`,
+              body: `You were the slowest to point to heaven. Shame.`,
+            });
+          await app.redisClient.del(`${socket.customInfo.room}:responses`);
+        }, 750);
+      }
+    });
+
+    socket.on(EventTypes.game[8], async ({ drinker }) => {
+      await app.redisClient.set(
+        `${socket.customInfo.room}:expectedResponses`,
+        await app.io.getNumSocketsInRoom(socket.customInfo.room)
+      );
+      const name = socket.customInfo.name;
+      app.io
+        .in(socket.customInfo.room)
+        .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+          header: `${name} has selected ${drinker} as a mate.`,
+          bodyType: "String",
+          body: `Starting now, ${drinker} must also drink whenever ${name} drinks`,
+        });
+    });
+
+    socket.on(EventTypes.game[9], async (userInput) => {
+      await app.redisClient.set(
+        `${socket.customInfo.room}:expectedResponses`,
+        await app.io.getNumSocketsInRoom(socket.customInfo.room)
+      );
+      app.io
+        .in(socket.customInfo.room)
+        .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+          header: `${socket.customInfo.name} has selected the following word to rhyme with:`,
+          bodyType: "String",
+          body: userInput,
+        });
+    });
+    socket.on(EventTypes.game[10], async (userInput) => {
+      await app.redisClient.set(
+        `${socket.customInfo.room}:expectedResponses`,
+        await app.io.getNumSocketsInRoom(socket.customInfo.room)
+      );
+      app.io
+        .in(socket.customInfo.room)
+        .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+          header: `${socket.customInfo.name} has selected the category`,
+          bodyType: "String",
+          body: userInput,
+        });
+    });
+    socket.on(EventTypes.game[11], async (userInput) => {
+      await app.redisClient.set(
+        `${socket.customInfo.room}:expectedResponses`,
+        await app.io.getNumSocketsInRoom(socket.customInfo.room)
+      );
+      app.io
+        .in(socket.customInfo.room)
+        .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+          header: `Never have I ever...`,
+          bodyType: "String",
+          body: `${socket.customInfo.name} says: ${userInput}`,
+        });
+    });
+
+    socket.on(EventTypes.game[13], async (userInput) => {
+      await app.redisClient.set(
+        `${socket.customInfo.room}:expectedResponses`,
+        await app.io.getNumSocketsInRoom(socket.customInfo.room)
+      );
+      app.io
+        .in(socket.customInfo.room)
+        .emit(EventTypes.server.BROADCAST.ANNOUNCEMENT, {
+          header: `KING'S CUP! ${socket.customInfo.name} created a new rule!`,
+          bodyType: "String",
+          body: `${userInput}`,
+        });
+    });
+
+    socket.on(EventTypes.client.READY_FOR_NEXT_ROUND, async () => {
+      await app.redisClient.incr(`${socket.customInfo.room}:ready`);
+      const numResponses = Number(
+        await app.redisClient.get(`${socket.customInfo.room}:ready`)
+      );
+      const expectedResponses = Number(
+        await app.redisClient.get(`${socket.customInfo.room}:expectedResponses`)
+      );
+
+      if (numResponses === expectedResponses) {
         app.io
           .in(socket.customInfo.room)
-          .emit(EventTypes.server.BROADCAST.DRINKERS, [drinker]);
-        await app.redisClient.del(`${socket.customInfo.room}:responses`);
+          .emit(EventTypes.server.BROADCAST.PROCEED_TO_NEXT_ROUND);
+        await app.redisClient.del(
+          `${socket.customInfo.room}:ready`,
+          `${socket.customInfo.room}:expectedResponses)`
+        );
+      } else {
+        console.log({ numResponses, expectedResponses });
       }
     });
 
@@ -163,9 +326,11 @@ module.exports = (app) => {
             currentPlayer: nextPlayerIndex,
           });
         } else {
-          await app.redisClient.del(`${socket.customInfo.room}:cards`);
-          await app.redisClient.del(`${socket.customInfo.room}:currentPlayer`);
-          await app.redisClient.del(`${socket.customInfo.room}:responses`);
+          await app.redisClient.del(
+            `${socket.customInfo.room}:cards`,
+            `${socket.customInfo.room}:currentPlayer`,
+            `${socket.customInfo.room}:responses`
+          );
           console.log(`Closed room: ${socket.customInfo.room}`);
         }
       } catch (err) {

@@ -14,29 +14,40 @@ const Cards = () => {
   const { topCard } = game;
   const isMyTurn = () =>
     game.players[game.currentPlayer] === `${user.name}${user.gender}`;
-
   const onClickFlipCard = (ev) => {
     ev.preventDefault();
-    if (!isMyTurn()) return;
+    if (!(isMyTurn() && game.everyoneReady)) return;
     socket.emit(EventTypes.client.FLIP_CARD, { room: user.room });
   };
   useEffect(() => {
     switch (game.topCard.val) {
-      case 3:
-        socket.emit(EventTypes.game[3], { user });
-        break;
+      case 2:
       case 8:
-        setGame({
-          showMateForm: true,
-        });
+      case 9:
+      case 10:
+      case 11:
+      case 13:
+        if (isMyTurn())
+          setTimeout(() => {
+            setGame({
+              showForm: game.topCard.val,
+            });
+          }, 750);
+
+        break;
+
+      case 3:
+        if (isMyTurn())
+          setTimeout(() => socket.emit(EventTypes.game[3], { user }), 750);
+        break;
     }
-  }, [game.topCard]);
+  }, [game.topCard, game.currentPlayer]);
 
   return (
     <div id="cards-container">
       <Card
-        className={isMyTurn() ? `enabled` : ``}
-        src={isMyTurn() ? FaceDownCard : FaceDownCard_BW}
+        isEnabled={isMyTurn() && game.everyoneReady ? `enabled` : ``}
+        src={isMyTurn() && game.everyoneReady ? FaceDownCard : FaceDownCard_BW}
         alt="Face Down Card"
         onClick={onClickFlipCard}
       />

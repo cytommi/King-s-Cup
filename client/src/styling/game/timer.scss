@@ -1,26 +1,28 @@
 @use '../colors';
 #timer {
-  //   z-index: 1000;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 1em;
+  right: 1em;
+
   h1 {
+    background-color: colors.$dark_background;
+    padding-bottom: 0.4em;
+    text-align: center;
+    border-radius: 50%;
+    border: 5px solid colors.$form_highlight;
+    width: 1.15em;
+    height: 1.15em;
     &.__3 {
-      color: colors.$success_0;
-      font-size: 40vw;
+      color: colors.$success_-1;
+      font-size: 15vw;
     }
     &.__2 {
-      color: colors.$success_1;
-      font-size: 40vw;
+      color: colors.$success_0;
+      font-size: 15vw;
     }
     &.__1 {
-      color: colors.$success_2;
-      font-size: 40vw;
+      color: colors.$success_1;
+      font-size: 15vw;
     }
   }
 }

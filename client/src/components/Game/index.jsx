@@ -8,26 +8,25 @@ import GamePlayers from './GamePlayers';
 import Mates from './Mates';
 import { Heaven, Floor } from './GameButtons';
 import Cards from './Cards';
-import Popup from './Popup';
-import MateForm from './MateForm';
+import Drinkers from './Drinkers';
+import PlayerSelectForm from './PlayerSelectForm';
+import MinigameInputForm from './MinigameInputForm';
+import Announcement from './Announcement';
 import Timer from './Timer';
 import '../../styling/game/base.scss';
 
 const Game = () => {
   const { roomcode } = useParams();
   const { user, socket, resetUser } = useContext(GlobalContext);
-  const {
-    setGame,
-    beginCountdown,
-    setCache,
-    updateGameFromCache,
-    clearDrinkers,
-  } = useContext(GameContext);
+  const { game, setGame, beginCountdown, setCache, clearDrinkers } = useContext(
+    GameContext
+  );
   const history = useHistory();
 
   if (roomcode !== user.room) {
     return <Redirect to="/"></Redirect>;
   }
+
   useEffect(() => {
     const joinSocket = async () => {
       const res = await fetch(`${process.env.API_URL}/game/${roomcode}`, {
@@ -70,8 +69,19 @@ const Game = () => {
       }
     );
     socket.on(EventTypes.server.BROADCAST.DRINKERS, (drinkers) => {
+      if (drinkers.length === 0)
+        setGame({
+          drinkers: [undefined],
+        });
+      else
+        setGame({
+          drinkers,
+        });
+    });
+    socket.on(EventTypes.server.BROADCAST.ANNOUNCEMENT, (announcement) => {
       setGame({
-        drinkers,
+        announcement,
+        showAnnouncement: true,
       });
     });
 
@@ -79,14 +89,19 @@ const Game = () => {
       clearDrinkers();
       beginCountdown(3);
       setGame({
-        currentPlayer: -1,
+        currentPlayer: nextPlayerIndex,
+        everyoneReady: false,
       });
       setCache({
-        currentPlayer: nextPlayerIndex,
         topCard: card,
+        // currentPlayer: nextPlayerIndex,
       });
-      /** comment this out */
-      // updateGameFromCache();
+    });
+
+    socket.on(EventTypes.server.BROADCAST.PROCEED_TO_NEXT_ROUND, () => {
+      setGame({
+        everyoneReady: true,
+      });
     });
 
     joinSocket();
@@ -107,8 +122,10 @@ const Game = () => {
         <Mates />
         <Timer />
       </div>
-      <MateForm />
-      <Popup />
+      <PlayerSelectForm />
+      <MinigameInputForm />
+      <Drinkers />
+      <Announcement />
     </>
   );
 };

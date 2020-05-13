@@ -5,18 +5,22 @@ import GameReducer from './GameReducer';
 const initialState = {
   players: [],
   currentPlayer: 0 /** index */,
+  everyoneReady: true,
   currentDeck: [],
   topCard: {
     imageName: undefined,
     suit: undefined,
     val: 0,
     eventName: undefined,
-  } /** cards are 1-indexed */,
+  },
   countdown: 0,
   cache: undefined,
+  showDrinkers: false,
   drinkers: [],
   mates: [],
-  showMateForm: false,
+  showForm: false,
+  announcement: undefined,
+  showAnnouncement: false,
 };
 
 export const GameContext = createContext(initialState);
@@ -68,6 +72,13 @@ export const GameProvider = ({ children }) => {
       type: GameActions.clearDrinkers,
     });
   };
+
+  const setShowDrinkers = (bool) => {
+    dispatch({
+      type: GameActions.setShowDrinkers,
+      payload: bool,
+    });
+  };
   const addMate = (name) => {
     dispatch({
       type: GameActions.addMate,
@@ -85,6 +96,7 @@ export const GameProvider = ({ children }) => {
         setCache,
         updateGameFromCache,
         clearDrinkers,
+        setShowDrinkers,
         addMate,
       }}
     >

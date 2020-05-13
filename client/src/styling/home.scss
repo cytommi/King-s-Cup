@@ -128,3 +128,23 @@
     }
   }
 }
+@media only screen and (max-width: 700px) {
+  #home {
+    h1 {
+      font-size: 30px;
+    }
+    form {
+      .flex-item {
+        margin: 0.3em 0;
+      }
+      h1 {
+        font-size: 18px;
+      }
+      h2,
+      label,
+      input[type='string'] {
+        font-size: 15px;
+      }
+    }
+  }
+}

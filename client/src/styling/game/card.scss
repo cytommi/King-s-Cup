@@ -1,28 +1,39 @@
 @use '../colors';
 .card {
-  //   position: relative;
-  margin: 0em 2em 2em 2em;
-  h2 {
-    position: relative;
-    top: calc(18vw * 726 / 500 * 0.49);
-    z-index: 4;
-    font-family: 'oswald', sans-serif;
-    color: colors.$alert_-1;
-    font-size: 25px;
-    @media only screen and (max-width: 700px) {
-      font-size: 15px;
-    }
-    border-radius: 0.5em;
-    width: 100%;
-    background-color: colors.$secondary_2;
-    text-align: center;
-    text-transform: capitalize;
-    width: 90%;
-    margin: auto;
+  margin: 0 1em;
+  &.enabled {
+    animation-name: pulse-card;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    border-radius: 1em;
+  }
+
+  &.enabled:hover {
+    cursor: pointer;
   }
   img {
     z-index: 3;
-    width: 19vw;
+    width: 15vw;
+    @media only screen and (max-width: 700px) {
+      width: 42vw;
+    }
     max-width: 300px;
+  }
+
+  @keyframes pulse-card {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 colors.$success_0;
+    }
+
+    60% {
+      transform: scale(1.07);
+      box-shadow: 0px 0px 10px colors.$success_1;
+    }
+
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 colors.$main_0;
+    }
   }
 }

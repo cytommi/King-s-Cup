@@ -1,6 +1,6 @@
 @use '../colors';
-
-#drinkers-popup {
+#minigame-input-form {
+  z-index: 100;
   position: fixed;
   top: 20vh;
   left: 30vw;
@@ -19,35 +19,56 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+
   h1 {
-    &.drink-up {
-      color: colors.$alert_0;
+    color: colors.$form_header;
+  }
+
+  input {
+    background-color: colors.$secondary_2;
+    color: colors.$secondary_-2;
+    border-radius: 0.5em;
+    padding-left: 0.8em;
+    font-size: 15px;
+    line-height: 2em;
+    margin-top: 2em;
+    &:focus {
+      box-shadow: inset 0px 0px 0px 2px colors.$form_highlight;
     }
-    &.safe {
-      color: colors.$secondary_-2;
-    }
   }
-  .M {
-    color: colors.$male;
-  }
-  .F {
-    color: colors.$female;
-  }
+
   button {
-    position: relative;
-    top: 2em;
+    margin-top: 2em;
     font-family: 'oswald', sans-serif;
     font-size: 20px;
     border-radius: 1em;
     padding: 0.2em 1.5em;
     transition: transform 80ms ease-in;
     box-shadow: 4px 6px 6px colors.$success_-2;
+    color: colors.$dark_low-contrast;
     &:hover {
       cursor: pointer;
       color: colors.$success_-1;
     }
     &:active {
       transform: scale(0.96);
+    }
+  }
+  @media only screen and (max-width: 500px) {
+    bottom: 5px;
+    left: 5px;
+    #players-list {
+      border-radius: 0.5em;
+      padding: 0.3em;
+      ul {
+        li {
+          margin-left: 0;
+        }
+      }
+    }
+    h2 {
+      font-size: 25px;
     }
   }
 }

@@ -27,7 +27,7 @@ const GameReducer = (state, action) => {
     case GameActions.setCache:
       return {
         ...state,
-        cache: action.payload,
+        cache: { ...state.cache, ...action.payload },
       };
 
     case GameActions.updateGameFromCache:
@@ -40,6 +40,11 @@ const GameReducer = (state, action) => {
       return {
         ...state,
         drinkers: [],
+      };
+    case GameActions.setShowDrinkers:
+      return {
+        ...state,
+        showDrinkers: action.payload,
       };
     case GameActions.addMate:
       return {

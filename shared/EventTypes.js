@@ -4,12 +4,15 @@ module.exports = {
     LEAVE_GAME: "leave-game",
     INFO_RESPONSE: "info-response",
     FLIP_CARD: "flip-card",
+    READY_FOR_NEXT_ROUND: "ready-for-next-round",
   },
   server: {
     BROADCAST: {
       NEW_MEMBER: "broadcast-new-member",
       DELETE_MEMBER: "broadcast-delete-member",
       DRINKERS: "broadcast-drinkers",
+      PROCEED_TO_NEXT_ROUND: "broadcast-proceed-to-next-round",
+      ANNOUNCEMENT: "broadcast-announcement",
     },
     ERROR: {
       INVALID_JOIN_CODE: "error-invalid-join-code",

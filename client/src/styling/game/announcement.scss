@@ -1,0 +1,95 @@
+@use '../colors';
+
+#announcement {
+  z-index: 10000;
+  position: fixed;
+  top: 20vh;
+  left: 30vw;
+  width: 40vw;
+  min-height: 200px;
+  font-family: 'oswald', sans-serif;
+  background-color: colors.$alert_0;
+  border-radius: 3.5em;
+  padding: 1em 3em;
+  margin: 1.5em;
+  box-shadow: 4px 6px 6px colors.$main_-2;
+  border: 5px solid colors.$form_highlight;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fade-in 1s;
+
+  h1 {
+    color: colors.$form_header;
+    stroke: 1.5px colors.$alert_2 solid;
+  }
+
+  h2 {
+    margin-top: 0.5em;
+    color: colors.$dark_high-contrast;
+  }
+
+  ul {
+    li {
+      color: colors.$secondary_0;
+    }
+  }
+  button {
+    margin-top: 2em;
+    font-family: 'oswald', sans-serif;
+    font-size: 20px;
+    border-radius: 1em;
+    padding: 0.2em 1.5em;
+    transition: transform 80ms ease-in;
+    box-shadow: 4px 6px 6px colors.$alert_-1;
+    color: colors.$alert_0;
+    transition: transform box-shadow ease-in-out;
+    animation-name: pulse;
+    animation-iteration-count: infinite;
+    animation-duration: 1.2s;
+    &:hover {
+      cursor: pointer;
+      color: colors.$alert_1;
+      box-shadow: 4px 6px 6px colors.$alert_-2;
+    }
+    &:active {
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+
+    60% {
+      transform: scale(1.07);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  @media only screen and (max-width: 700px) {
+    width: 90%;
+    top: 35%;
+    left: 5%;
+    margin: 0;
+    h1 {
+      font-size: 20px;
+    }
+    h2 {
+      font-size: 15px;
+    }
+  }
+}
