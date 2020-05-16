@@ -15,50 +15,62 @@ const Form = () => {
     return !(user.name && customCode);
   };
 
-  const onClickJoin = async (ev) => {
-    ev.preventDefault();
-    const res = await fetch(
-      `${process.env.API_URL}/game/${joinCode}/${user.name}`,
-      {
-        method: 'HEAD',
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      }
-    );
-    if (res.ok) {
-      setUser({
-        ...user,
-        room: joinCode,
-      });
-      history.push(`/game/${joinCode}`);
-    } else if (res.status === 404) {
-      setError(`Join Code: ${joinCode} does not exist`);
-    } else if (res.status === 409) {
-      setError(
-        `Player name: ${user.name} already exists in game room. Try another name.`
-      );
-    }
-  };
-  const onClickCreate = async (ev) => {
-    ev.preventDefault();
-    const res = await fetch(`${process.env.API_URL}/game`, {
+  const createRequest = async (roomCode) => {
+    return await fetch(`${process.env.API_URL}/game/${roomCode}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ customCode }),
     });
+  };
+
+  const joinRequest = async (roomCode, user) => {
+    return await fetch(`${process.env.API_URL}/game/${roomCode}/players`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({
+        name: user.name,
+        gender: user.gender,
+      }),
+    });
+  };
+
+  const onClickJoin = async (ev) => {
+    ev.preventDefault();
+    const res = await joinRequest(joinCode, user);
     if (res.ok) {
       setUser({
         ...user,
-        room: customCode,
+        room: joinCode /** AUTH */,
+      });
+      history.push(`/game/${joinCode}`);
+    } else {
+      const data = await res.json();
+      setError(data.error);
+    }
+  };
+
+  const onClickCreate = async (ev) => {
+    ev.preventDefault();
+    const createRes = await createRequest(customCode);
+    if (!createRes.ok) {
+      const data = await createRes.json();
+      setError(data.error);
+      return;
+    }
+    const joinRes = await joinRequest(customCode, user);
+    if (joinRes.ok) {
+      setUser({
+        ...user,
+        room: customCode /** AUTH */,
       });
       history.push(`/game/${customCode}`);
     } else {
-      const data = await res.json();
+      const data = await joinRes.json();
       setError(data.error);
     }
   };

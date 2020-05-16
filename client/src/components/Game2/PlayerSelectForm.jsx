@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { GlobalContext } from '../../context/Global';
-import { GameContext } from '../../context/Game';
+import { GameContext } from '../../context/Game2';
 import EventTypes from '../../../../shared/EventTypes';
 import { parseUserInfo } from './utilities';
 import '../../styling/game/playerSelectForm.scss';

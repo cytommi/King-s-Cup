@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { GameContext } from '../../context/Game';
+import { GameContext } from '../../context/Game2';
 import { GlobalContext } from '../../context/Global';
 import images from '../../assets/images';
 import FaceDownCard from '../../assets/images/face_down.jpg';

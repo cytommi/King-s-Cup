@@ -1,132 +1,90 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useHistory, useParams, Redirect } from 'react-router-dom';
 import { GlobalContext } from '../../context/Global';
 import { GameContext } from '../../context/Game';
-import EventTypes from '../../../../shared/EventTypes';
+import CenterPan from './CenterPan';
+import LeftPan from './LeftPan';
+import RightPan from './RightPan';
+import GameEvents from '../../../../shared/GameEvents';
+
+/** Components */
 import TopNav from './TopNav';
-import GamePlayers from './GamePlayers';
-import Mates from './Mates';
-import { Heaven, Floor } from './GameButtons';
-import Cards from './Cards';
-import Drinkers from './Drinkers';
-import PlayerSelectForm from './PlayerSelectForm';
-import MinigameInputForm from './MinigameInputForm';
-import Announcement from './Announcement';
-import Timer from './Timer';
+
 import '../../styling/game/base.scss';
 
-const Game = () => {
-  const { roomcode } = useParams();
-  const { user, socket, resetUser } = useContext(GlobalContext);
-  const { game, setGame, beginCountdown, setCache, clearDrinkers } = useContext(
-    GameContext
-  );
-  const history = useHistory();
+const {
+  BEGIN_COUNTDOWN,
+  FLIP_CARD,
+  SHOW_FORM,
+  SHOW_ANNOUNCEMENT,
+  BEGIN_ROUND,
+  BROADCAST,
+} = GameEvents.server;
 
-  if (roomcode !== user.room) {
-    return <Redirect to="/"></Redirect>;
-  }
+const Game = () => {
+  const { socket, user } = useContext(GlobalContext);
+  const [gameState, dispatch] = useContext(GameContext);
+  const history = useHistory();
+  const { roomcode } = useParams();
+  if (user.room !== roomcode) return <Redirect to="/" />;
 
   useEffect(() => {
-    const joinSocket = async () => {
-      const res = await fetch(`${process.env.API_URL}/game/${roomcode}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ name: user.name, gender: user.gender }),
-      });
-      if (res.ok) {
-        const { players, currentDeck, currentPlayer } = await res.json();
-        setGame({
-          players,
-          currentDeck,
-          currentPlayer,
-        });
-        socket.emit(EventTypes.client.JOIN_GAME, {
-          name: user.name,
-          room: user.room,
-          gender: user.gender,
-        });
-      } else {
-        console.log('Error joining game. Redirecting back to home page.');
-        history.push('/');
-      }
-    };
+    socket.emit(GameEvents.client.JOIN_GAME, { ...user });
 
-    socket.on(EventTypes.server.BROADCAST.NEW_MEMBER, ({ players }) => {
-      setGame({ players });
+    socket.on(BROADCAST.DATA_SYNC, (latestState) => {
+      dispatch({
+        type: BROADCAST.DATA_SYNC,
+        payload: latestState,
+      });
     });
 
-    socket.on(
-      EventTypes.server.BROADCAST.DELETE_MEMBER,
-      ({ players, currentPlayer }) => {
-        setGame({
-          players,
-          currentPlayer,
-        });
-      }
+    socket.on(BROADCAST.NEW_MEMBER, (players) => {
+      dispatch({
+        type: BROADCAST.NEW_MEMBER,
+        payload: players,
+      });
+    });
+
+    socket.on(BEGIN_COUNTDOWN, () =>
+      dispatch({
+        type: BEGIN_COUNTDOWN,
+      })
     );
-    socket.on(EventTypes.server.BROADCAST.DRINKERS, (drinkers) => {
-      if (drinkers.length === 0)
-        setGame({
-          drinkers: [undefined],
-        });
-      else
-        setGame({
-          drinkers,
-        });
-    });
-    socket.on(EventTypes.server.BROADCAST.ANNOUNCEMENT, (announcement) => {
-      setGame({
-        announcement,
-        showAnnouncement: true,
+
+    socket.on(FLIP_CARD, ({ topCard }) => {
+      dispatch({
+        type: FLIP_CARD,
+        payload: topCard,
       });
     });
 
-    socket.on(EventTypes.server.CARD_FLIPPED, ({ card, nextPlayerIndex }) => {
-      clearDrinkers();
-      beginCountdown(3);
-      setGame({
-        currentPlayer: nextPlayerIndex,
-        everyoneReady: false,
-      });
-      setCache({
-        topCard: card,
-        // currentPlayer: nextPlayerIndex,
+    socket.on(SHOW_FORM, () => {
+      dispatch({
+        type: SHOW_FORM,
       });
     });
 
-    socket.on(EventTypes.server.BROADCAST.PROCEED_TO_NEXT_ROUND, () => {
-      setGame({
-        everyoneReady: true,
+    socket.on(SHOW_ANNOUNCEMENT, () => {
+      dispatch({
+        type: SHOW_ANNOUNCEMENT,
       });
     });
 
-    joinSocket();
-    return () => {
-      socket.emit(EventTypes.client.LEAVE_GAME);
-      resetUser();
-    };
+    socket.on(BEGIN_ROUND, () => {
+      dispatch({
+        type: BEGIN_ROUND,
+      });
+    });
+
+    return () => socket.emit(GameEvents.client.QUIT_GAME);
   }, []);
-
   return (
-    <>
-      <div id="game">
-        <TopNav />
-        <Heaven />
-        <Cards />
-        <Floor />
-        <GamePlayers />
-        <Mates />
-        <Timer />
-      </div>
-      <PlayerSelectForm />
-      <MinigameInputForm />
-      <Drinkers />
-      <Announcement />
-    </>
+    <div id="game">
+      <TopNav />
+      <LeftPan />
+      <CenterPan />
+      <RightPan />
+    </div>
   );
 };
 

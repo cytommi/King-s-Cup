@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { GameContext } from '../../context/Game';
+import { GameContext } from '../../context/Game2';
 import { parseUserInfo } from './utilities';
 
 import '../../styling/game/mates.scss';

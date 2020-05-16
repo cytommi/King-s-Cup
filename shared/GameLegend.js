@@ -1,0 +1,15 @@
+module.exports = {
+  1: { name: "waterfall", announcement_message: "" },
+  2: { name: "you", announcement_message: "" },
+  3: { name: "me", announcement_message: "" },
+  4: { name: "floor", announcement_message: "" },
+  5: { name: "guys", announcement_message: "" },
+  6: { name: "chicks", announcement_message: "" },
+  7: { name: "heaven", announcement_message: "" },
+  8: { name: "mate", announcement_message: "" },
+  9: { name: "rhyme", announcement_message: "" },
+  10: { name: "categories", announcement_message: "" },
+  11: { name: "never have I ever", announcement_message: "" },
+  12: { name: "questions", announcement_message: "" },
+  13: { name: "king's cup", announcement_message: "" },
+};

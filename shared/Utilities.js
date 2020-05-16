@@ -1,9 +1,21 @@
-const EventTypes = require("./EventTypes");
+const GameLegend = require("./GameLegend");
 
 module.exports = {
-  getCard: (val) => {
-    if (val < 1 || val > 52)
-      throw new Error("Card value has to be between 1 and 52 (inclusive)");
+  CardDeck: () => {
+    const shuffleArray = (array) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    };
+    let deck = Array.from(Array(52)).map((e, i) => i + 1);
+    shuffleArray(deck);
+    return deck;
+  },
+
+  parseCard: (val) => {
+    if (val > 52) throw new Error("Card value has to be less than 52");
+    if (val < 1) return null;
 
     let numVal = ((val - 1) % 13) + 1;
     const suit = (val - numVal) / 13;
@@ -32,7 +44,7 @@ module.exports = {
           imageName: `${faceVal}_of_clubs`,
           suit: "clubs",
           val: numVal,
-          eventName: EventTypes.game[numVal],
+          eventName: GameLegend[numVal].name,
         };
 
       case 1:
@@ -40,24 +52,28 @@ module.exports = {
           imageName: `${faceVal}_of_diamonds`,
           suit: "diamonds",
           val: numVal,
-          eventName: EventTypes.game[numVal],
+          eventName: GameLegend[numVal].name,
         };
       case 2:
         return {
           imageName: `${faceVal}_of_hearts`,
           suit: "hearts",
           val: numVal,
-          eventName: EventTypes.game[numVal],
+          eventName: GameLegend[numVal].name,
         };
       case 3:
         return {
           imageName: `${faceVal}_of_spades`,
           suit: "spades",
           val: numVal,
-          eventName: EventTypes.game[numVal],
+          eventName: GameLegend[numVal].name,
         };
       default:
         throw new Error("Something is wrong with your math");
     }
+  },
+
+  parseUserInfo: (str) => {
+    return str.split("_");
   },
 };

@@ -1,0 +1,31 @@
+import React, { useContext } from 'react';
+import { GameContext } from '../../../context/Game';
+import { GlobalContext } from '../../../context/Global';
+import BackOfCard from '../../../assets/images/face_down.jpg';
+import BackOfCard_BW from '../../../assets/images/face_down_black_and_white.jpg';
+import GameEvents from '../../../../../shared/GameEvents';
+
+const FaceDownCard = () => {
+  const { user, socket } = useContext(GlobalContext);
+  const [gameState, dispatch] = useContext(GameContext);
+  const onClick = (ev) => {
+    ev.preventDefault();
+    socket.emit(GameEvents.client.CLICKED_CARD);
+  };
+  const isMyTurn = () =>
+    gameState.players[gameState.currentPlayer] ===
+    `${user.name}_${user.gender}`;
+
+  return (
+    <div id="face-down-card">
+      <img
+        className={isMyTurn() ? 'enabled' : ''}
+        src={isMyTurn() ? BackOfCard : BackOfCard_BW}
+        alt={`Face Down Card`}
+        onClick={onClick}
+      />
+    </div>
+  );
+};
+
+export default FaceDownCard;

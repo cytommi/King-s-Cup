@@ -1,93 +1,105 @@
-const { CardDeck } = require("./utilities");
-
+const GamePhases = require("../../shared/GamePhases");
 module.exports = (app) => {
-  /** Client checking if a room code exists, or if name conflicts with existing players */
-  app.head("/api/game/:code/:name", async (req, res) => {
-    const roomCode = req.params.code;
-    const name = req.params.name;
+  /**
+   * @ENDPOINT
+   * @method HEAD
+   * @description check if room name exists
+   * @param {req.params.room}
+   * @returns {204 (if exists) || 404}
+   */
+  app.head("/api/game/:room", async (req, res) => {
+    const { room } = req.params;
+    if (await app.game.roomExists(room)) return res.status(204).send();
+    return res.status(404).send();
+  });
+
+  /**
+   * @ENDPOINT
+   * @method HEAD
+   * @description Check if name conflicts with existing names in room
+   * @param {req.params.room}
+   * @param {req.params.name}
+   * @returns {204 || 409 (if name conflicts)}
+   */
+  /** Check if name conflicts with names already in room */
+  app.head("/api/game/:room/:name", async (req, res) => {
+    const { room, name } = req.params;
     try {
-      const players = await app.redisClient.lrange(
-        `${roomCode}:players`,
-        0,
-        -1
-      );
-      if (players.length > 0) {
-        if (players.includes(`${name}M`, `${name}F`)) {
-          return res.status(409).send();
-        } else return res.status(204).send();
-      } else return res.status(404).send();
     } catch (err) {
       return res.status(400).send({ error: err });
     }
   });
 
   /**
+   * @ENDPOINT
+   * @method POST
    * @description Client creates game
-   * @param {req.body.customCode}
-   * @param {req.body.name}
+   * @param {req.params.room}
+   * @returns {201 || 400}
    */
-  app.post("/api/game", async (req, res) => {
-    const { customCode } = req.body;
+  app.post("/api/game/:room", async (req, res) => {
+    const { room } = req.params;
     try {
-      /** Check if room code conflicts */
-      const players = await app.redisClient.lrange(
-        `${customCode}:players`,
-        0,
-        -1
-      );
-      if (players.length > 0) {
+      if (await app.game.roomExists(room))
         return res.status(409).send({
-          error: `Room code: ${customCode} already exists. Try another code.`,
+          error: `Room code: ${room} already exists. Try another code!`,
         });
-      }
-
-      /** Initialize members list */
-      await app.redisClient.rpush(`${customCode}:players`, `INIT_PLACEHOLDER`);
-
       /** Initialize card deck */
-      await app.redisClient.rpush(`${customCode}:cards`, ...CardDeck());
+      await app.game.initCards(room);
+
+      /** Initialize game phase to pendingCardClick */
+      await app.game.setPhase(GamePhases.PENDING_CARD_CLICK);
 
       /** DELETE THIS */
       for (let i = 13; i >= 1; --i)
-        await app.redisClient.lpush(`${customCode}:cards`, i);
+        await app.redisClient.lpush(`${room}:CARDS`, i);
 
-      await app.redisClient.set(`${customCode}:currentPlayer`, 0);
+      await app.game.setCurrentPlayer(room, 0);
       res.status(201).send();
     } catch (err) {
       res.status(400).send({ error: err });
     }
   });
 
-  /** Client joins game */
-  app.put("/api/game/:code", async (req, res) => {
+  /**
+   * @ENDPOINT
+   * @method POST
+   * @description client joins game
+   * @param {req.params.room}
+   * @param {req.body.name}
+   * @param {req.body.gender}
+   * @returns {201 || 400 || 401}
+   */
+  app.post("/api/game/:room/players", async (req, res) => {
+    const { room } = req.params;
     const { name, gender } = req.body;
-    if (!name || !gender) return res.status(401).send();
-    const playerName = `${name}${gender}`;
-    const roomCode = req.params.code;
+    if (!name || !gender)
+      return res
+        .status(401)
+        .send({ error: "Body must contain non-empty name and gender fields." });
+
+    const playerName = `${name}_${gender}`;
+
     try {
-      let players = await app.redisClient.lrange(`${roomCode}:players`, 0, -1);
-      await app.redisClient.rpush(`${roomCode}:players`, playerName);
-      if (players[0] === `INIT_PLACEHOLDER`)
-        await app.redisClient.lpop(`${roomCode}:players`);
+      /** Check if room exists */
+      if (!(await app.game.roomExists(room)))
+        return res
+          .status(404)
+          .send({ error: `${room} is not a valid room code.` });
 
-      players = await app.redisClient.lrange(`${roomCode}:players`, 0, -1);
-      const currentDeck = await app.redisClient.lrange(
-        `${roomCode}:cards`,
-        0,
-        -1
-      );
+      /** Check if name conflicts */
+      const players = await app.game.getPlayers(room);
+      if (players.some((p) => p === `${name}_M` || p === `${name}_F`))
+        return res.status(409).send({
+          error: `Someone with the name: ${name} already exists in the room. Try another name!`,
+        });
 
-      const currentPlayer = await app.redisClient.get(
-        `${roomCode}:currentPlayer`
-      );
+      /** PASS */
+      await app.game.addPlayer(room, playerName);
 
-      return res.status(201).send({
-        players,
-        currentDeck,
-        currentPlayer,
-      });
+      return res.status(201).send();
     } catch (err) {
-      return res.status(400).send({ error: err });
+      return res.status(400).send({ error: "Error attempting to join room." });
     }
   });
 };

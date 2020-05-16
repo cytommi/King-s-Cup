@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { GameContext } from '../../context/Game';
+import { GameContext } from '../../context/Game2';
 import '../../styling/game/players.scss';
 import CurrentPlayerArrow from '../../assets/icons/current_player_arrow.svg';
 import { parseUserInfo } from './utilities';

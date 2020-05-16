@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { GlobalContext } from '../../context/Global';
-import { GameContext } from '../../context/Game';
+import { GameContext } from '../../context/Game2';
 import { parseUserInfo } from './utilities';
 import EventTypes from '../../../../shared/EventTypes';
 import '../../styling/game/drinkers.scss';

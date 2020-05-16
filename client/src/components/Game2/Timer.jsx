@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useRef } from 'react';
-import { GameContext } from '../../context/Game';
+import { GameContext } from '../../context/Game2';
 import '../../styling/game/timer.scss';
 
 const Timer = () => {

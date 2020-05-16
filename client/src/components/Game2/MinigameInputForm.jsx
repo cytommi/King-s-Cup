@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { GlobalContext } from '../../context/Global';
-import { GameContext } from '../../context/Game';
+import { GameContext } from '../../context/Game2';
 import EventTypes from '../../../../shared/EventTypes';
 import '../../styling/game/minigameInputForm.scss';
 
