@@ -4,9 +4,11 @@ import GameReducer from './Reducer';
 const initialState = {
   phase: undefined,
   players: [],
-  currentPlayer: [],
+  currentPlayer: -1,
   currentCard: {},
   drinksHad: 0,
+  mates: [],
+  announcement: undefined,
 };
 
 export const GameContext = createContext(initialState);

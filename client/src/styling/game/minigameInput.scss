@@ -1,5 +1,5 @@
 @use '../colors';
-#minigame-input-form {
+#minigame-input {
   z-index: 100;
   position: fixed;
   top: 20vh;
@@ -33,6 +33,7 @@
     font-size: 15px;
     line-height: 2em;
     margin-top: 2em;
+    text-align: center;
     &:focus {
       box-shadow: inset 0px 0px 0px 2px colors.$form_highlight;
     }

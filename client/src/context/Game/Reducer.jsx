@@ -12,7 +12,7 @@ const GameReducer = (state, action) => {
       return {
         ...state,
         phase: GamePhases.CARD_REACTION_TIME,
-        topCard: action.payload,
+        currentCard: action.payload,
       };
 
     case GameEvents.server.SHOW_FORM:
@@ -25,12 +25,15 @@ const GameReducer = (state, action) => {
       return {
         ...state,
         phase: GamePhases.PENDING_READY_RESPONSES,
+        announcement: action.payload,
       };
 
     case GameEvents.server.BEGIN_ROUND:
       return {
         ...state,
         phase: GamePhases.PENDING_CARD_CLICK,
+        announcement: {},
+        currentPlayer: action.payload,
       };
 
     /** BROADCAST EVENTS */
@@ -40,10 +43,15 @@ const GameReducer = (state, action) => {
         ...action.payload,
       };
 
-    case GameEvents.server.BROADCAST.DATA_SYNC:
+    case GameEvents.server.BROADCAST.NEW_MEMBER:
       return {
         ...state,
         players: action.payload,
+      };
+    case 'ADD_MATE':
+      return {
+        ...state,
+        mates: [...state.mates, action.payload],
       };
   }
 };

@@ -19,6 +19,15 @@ module.exports = (app) => {
 
   const getPlayersCount = async (room) => await rc.llen(`${room}:PLAYERS`);
 
+  const getMalePlayers = async (room) => {
+    const players = await getPlayers(room);
+    return players.filter((p) => p.split("_")[1] === "M");
+  };
+  const getFemalePlayers = async (room) => {
+    const players = await getPlayers(room);
+    return players.filter((p) => p.split("_")[1] === "F");
+  };
+
   /** CURRENT_PLAYER */
   const setCurrentPlayer = async (room, index) =>
     await rc.set(`${room}:CURRENT_PLAYER`, index);
@@ -29,7 +38,7 @@ module.exports = (app) => {
   const incrCurrentPlayer = async (room) => {
     const curInd = await getCurrentPlayer(room);
     const playersCount = await getPlayersCount(room);
-    await setCurrentPlayer((curInd + 1) % playersCount);
+    await setCurrentPlayer(room, (curInd + 1) % playersCount);
   };
 
   /** CARDS */
@@ -42,7 +51,7 @@ module.exports = (app) => {
       await initCards(room);
       card = await rc.lpop(`${room}:CARDS`);
     }
-    await setCurrentCard(card);
+    await setCurrentCard(room, card);
     return parseCard(card);
   };
 
@@ -56,6 +65,18 @@ module.exports = (app) => {
   /** PHASE */
   const setPhase = async (room, phase) => await rc.set(`${room}:PHASE`, phase);
   const getPhase = async (room) => await rc.get(`${room}:PHASE`);
+
+  /** EXPECTED_RESPONSES */
+  const setExpectedResponses = async (room) =>
+    await rc.set(`${room}:EXPECTED_RES`, await getPlayersCount(room));
+  const getExpectedResponses = async (room) =>
+    await rc.get(`${room}:EXPECTED_RES`);
+
+  /** RESPONSES */
+  const incrResponses = async (room) => await rc.incr(`${room}:RESPONSES`);
+  const isEnoughResponses = async (room) =>
+    (await rc.get(`${room}:RESPONSES`)) === (await getExpectedResponses(room));
+  const resetResponses = async (room) => await rc.set(`${room}:RESPONSES`, 0);
 
   /** STATE */
   const getState = async (room) => {
@@ -73,6 +94,8 @@ module.exports = (app) => {
     delPlayer,
     getPlayers,
     getPlayersCount,
+    getMalePlayers,
+    getFemalePlayers,
 
     /** CURRENT_PLAYER */
     setCurrentPlayer,
@@ -88,8 +111,17 @@ module.exports = (app) => {
     getCurrentCard,
 
     /** PHASE */
-    getPhase,
     setPhase,
+    getPhase,
+
+    /** EXPECTED_RESPONSES */
+    setExpectedResponses,
+    getExpectedResponses,
+
+    /** RESPONSES */
+    incrResponses,
+    isEnoughResponses,
+    resetResponses,
 
     /** STATE */
     getState,

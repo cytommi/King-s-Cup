@@ -1,9 +1,5 @@
 @use '../colors';
 #players {
-  position: fixed;
-  right: 10px;
-  bottom: 10px;
-  padding: 3vh;
   font-family: 'oswald', sans-serif;
 
   h2 {
@@ -24,7 +20,7 @@
       padding-left: 0;
       list-style-type: none;
       li {
-        margin-left: 1em;
+        margin: 0 1em;
         font-size: 20px;
       }
     }

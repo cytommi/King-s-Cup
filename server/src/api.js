@@ -48,7 +48,7 @@ module.exports = (app) => {
       await app.game.initCards(room);
 
       /** Initialize game phase to pendingCardClick */
-      await app.game.setPhase(GamePhases.PENDING_CARD_CLICK);
+      await app.game.setPhase(room, GamePhases.PENDING_CARD_CLICK);
 
       /** DELETE THIS */
       for (let i = 13; i >= 1; --i)

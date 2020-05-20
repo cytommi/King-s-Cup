@@ -31,8 +31,170 @@ module.exports = (app) => {
     });
 
     socket.on(GameEvents.client.CLICKED_CARD, async () => {
-      await app.game.setPhase(GamePhases.COUNTDOWN);
-      app.io.in(socket.customInfo.room).emit(GameEvents.server.BEGIN_COUNTDOWN);
+      const { room } = socket.customInfo;
+      /** 1. Set Phase to COUNTDOWN */
+      await app.game.setPhase(room, GamePhases.COUNTDOWN);
+
+      /** 2. Begin countdown on client side */
+      app.io.in(room).emit(GameEvents.server.BEGIN_COUNTDOWN);
+
+      /** 3. After 3 seconds, reveal card to client side */
+      setTimeout(async () => {
+        const currentCard = await app.game.popCards(room);
+        app.io.in(room).emit(GameEvents.server.FLIP_CARD, {
+          currentCard,
+        });
+
+        /** 4. Set phase to CARD_REACTION_TIME  */
+        await app.game.setPhase(room, GamePhases.CARD_REACTION_TIME);
+
+        /** 5. Take action based on card */
+        switch (currentCard.val) {
+          case 1:
+            setTimeout(async () => {
+              await app.game.setExpectedResponses(room);
+              app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+                header: "Waterfall!",
+                bodyType: "text",
+                body:
+                  "You must keep chugging until the person left to you has stopped.",
+              });
+              await app.game.setPhase(room, GamePhases.PENDING_READY_RESPONSES);
+            }, 1500);
+
+            break;
+
+          case 5:
+          case 6:
+            setTimeout(async () => {
+              await app.game.setExpectedResponses(room);
+              app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+                header: currentCard.val === 5 ? "5 GUYS!" : "6 CHICKS",
+                bodyType: "array",
+                body:
+                  currentCard.val === 5
+                    ? await app.game.getMalePlayers(room)
+                    : await app.game.getFemalePlayers(room),
+              });
+              await app.game.setPhase(room, GamePhases.PENDING_READY_RESPONSES);
+            }, 1500);
+
+          case 4:
+          case 7:
+            app.io.in(room).emit(GameEvents.server.SHOW_FORM);
+            await app.game.setExpectedResponses(room);
+            await app.game.setPhase(room, GamePhases.PENDING_FORM_RESPONSES);
+
+          default:
+            setTimeout(async () => {
+              app.io.in(room).emit(GameEvents.server.SHOW_FORM);
+              await app.game.setPhase(room, GamePhases.PENDING_FORM_RESPONSES);
+            }, 1500);
+        }
+      }, 3050);
+    });
+
+    socket.on(GameEvents.client.FORM_SUBMISSION, async ({ type, payload }) => {
+      const { name, gender, room } = socket.customInfo;
+
+      switch (type) {
+        case 2:
+          await app.game.setExpectedResponses(room);
+          app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+            header: `So cruel, ${name}`,
+            bodyType: "string",
+            body: `${name} has picked ${
+              payload.split("_")[0]
+            } to drink this game!`,
+          });
+          break;
+        case 3:
+          await app.game.setExpectedResponses(room);
+          app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+            header: `POOR ${name}...`,
+            bodyType: "string",
+            body: `${name} must drink by ${
+              gender === "M" ? "him" : "her"
+            }self this round!`,
+          });
+          break;
+
+        case 4:
+        case 7:
+          await app.game.incrResponses(room);
+          if (await app.game.isEnoughResponses(room)) {
+            await app.game.resetResponses(room);
+            await app.game.setExpectedResponses(room);
+            app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+              header: type === 4 ? `4, FLOOR!` : "7, HEAVEN!",
+              bodyType: "string",
+              body: `${name} was the last to point to ${
+                type === 4 ? "the floor" : "Heaven"
+              }!`,
+            });
+          }
+          break;
+        case 8:
+          await app.game.setExpectedResponses(room);
+          app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+            header: `8 MATE!`,
+            bodyType: "string",
+            body: `${name} has picked ${payload.split("_")[0]} as ${
+              gender === "M" ? "his" : "her"
+            } mate!`,
+          });
+          break;
+        case 9:
+          await app.game.setExpectedResponses(room);
+          app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+            header: `9 RHYME!`,
+            bodyTYpe: "string",
+            body: `${name} has picked the word: ${payload}`,
+          });
+          break;
+
+        case 10:
+          await app.game.setExpectedResponses(room);
+          app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+            header: "CATEGORIES!",
+            bodyTYpe: "string",
+            body: `${name} has picked the category: ${payload}`,
+          });
+          break;
+
+        case 11:
+          await app.game.setExpectedResponses(room);
+          app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+            header: `${name} has never...`,
+            bodyTYpe: "string",
+            body: payload,
+          });
+          break;
+
+        case 13:
+          await app.game.setExpectedResponses(room);
+          app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+            header: `KING'S CUP! ${name} MADE A NEW RULE!`,
+            bodyTYpe: "string",
+            body: payload,
+          });
+          break;
+      }
+    });
+
+    socket.on(GameEvents.client.READY, async () => {
+      const { room } = socket.customInfo;
+      await app.game.incrResponses(room);
+      if (await app.game.isEnoughResponses(room)) {
+        await app.game.resetResponses(room);
+        await app.game.incrCurrentPlayer(room);
+        setTimeout(async () => {
+          app.io.in(room).emit(GameEvents.server.BEGIN_ROUND, {
+            currentPlayer: await app.game.getCurrentPlayer(room),
+          });
+          await app.game.setPhase(room, GamePhases.PENDING_CARD_CLICK);
+        }, 1000);
+      }
     });
     // socket.on(EventTypes.client.JOIN_GAME, async ({ name, room, gender }) => {
     //   socket.join(room);

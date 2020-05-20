@@ -1,16 +1,8 @@
 @use '../colors';
+
 .card {
   margin: 0 1em;
-  &.enabled {
-    animation-name: pulse-card;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    border-radius: 1em;
-  }
 
-  &.enabled:hover {
-    cursor: pointer;
-  }
   img {
     z-index: 3;
     width: 15vw;
@@ -18,6 +10,16 @@
       width: 42vw;
     }
     max-width: 300px;
+    &.enabled {
+      animation-name: pulse-card;
+      animation-duration: 1s;
+      animation-iteration-count: infinite;
+      border-radius: 1em;
+    }
+
+    &.enabled:hover {
+      cursor: pointer;
+    }
   }
 
   @keyframes pulse-card {

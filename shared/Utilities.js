@@ -44,7 +44,6 @@ module.exports = {
           imageName: `${faceVal}_of_clubs`,
           suit: "clubs",
           val: numVal,
-          eventName: GameLegend[numVal].name,
         };
 
       case 1:
@@ -52,21 +51,18 @@ module.exports = {
           imageName: `${faceVal}_of_diamonds`,
           suit: "diamonds",
           val: numVal,
-          eventName: GameLegend[numVal].name,
         };
       case 2:
         return {
           imageName: `${faceVal}_of_hearts`,
           suit: "hearts",
           val: numVal,
-          eventName: GameLegend[numVal].name,
         };
       case 3:
         return {
           imageName: `${faceVal}_of_spades`,
           suit: "spades",
           val: numVal,
-          eventName: GameLegend[numVal].name,
         };
       default:
         throw new Error("Something is wrong with your math");

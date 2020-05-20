@@ -21,8 +21,13 @@
   align-items: center;
   text-align: center;
   h1 {
-    color: colors.$form_header;
+    font-family: 'oswald', sans-serif;
+    color: white;
     margin-bottom: 0.5em;
+  }
+  ul {
+    list-style: none;
+    align-items: center;
   }
   label {
     font-size: 35px;

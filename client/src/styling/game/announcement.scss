@@ -7,7 +7,6 @@
   left: 30vw;
   width: 40vw;
   min-height: 200px;
-  font-family: 'oswald', sans-serif;
   background-color: colors.$alert_0;
   border-radius: 3.5em;
   padding: 1em 3em;
@@ -21,18 +20,27 @@
   animation: fade-in 1s;
 
   h1 {
-    color: colors.$form_header;
-    stroke: 1.5px colors.$alert_2 solid;
+    font-family: 'bungee', sans-serif;
+    text-shadow: 4px 2px 4px colors.$alert_-2;
+    color: white;
+    stroke: 6px solid colors.$form_header;
   }
 
   h2 {
+    font-family: 'oswald', sans-serif;
     margin-top: 0.5em;
     color: colors.$dark_high-contrast;
   }
 
   ul {
-    li {
-      color: colors.$secondary_0;
+    list-style: none;
+    font-family: 'oswald', sans-serif;
+    text-align: center;
+    .M {
+      color: colors.$male;
+    }
+    .F {
+      color: colors.$female;
     }
   }
   button {

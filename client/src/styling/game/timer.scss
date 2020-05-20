@@ -1,28 +1,20 @@
 @use '../colors';
 #timer {
-  position: fixed;
-  top: 1em;
-  right: 1em;
+  font-family: 'bungee', sans-serif;
+  font-size: 15vw;
+  text-shadow: 4px 2px 4px rgba(0, 0, 0, 0.25);
+  margin-bottom: 0.4em;
+  width: 1.15em;
+  height: 1.15em;
+  text-align: center;
+}
 
-  h1 {
-    background-color: colors.$dark_background;
-    padding-bottom: 0.4em;
-    text-align: center;
-    border-radius: 50%;
-    border: 5px solid colors.$form_highlight;
-    width: 1.15em;
-    height: 1.15em;
-    &.__3 {
-      color: colors.$success_-1;
-      font-size: 15vw;
-    }
-    &.__2 {
-      color: colors.$success_0;
-      font-size: 15vw;
-    }
-    &.__1 {
-      color: colors.$success_1;
-      font-size: 15vw;
-    }
-  }
+.__3 {
+  color: colors.$alert_-1;
+}
+.__2 {
+  color: colors.$alert_0;
+}
+.__1 {
+  color: colors.$alert_1;
 }

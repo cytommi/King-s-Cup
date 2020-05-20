@@ -1,15 +1,19 @@
-module.exports = {
-  1: { name: "waterfall", announcement_message: "" },
-  2: { name: "you", announcement_message: "" },
-  3: { name: "me", announcement_message: "" },
-  4: { name: "floor", announcement_message: "" },
-  5: { name: "guys", announcement_message: "" },
-  6: { name: "chicks", announcement_message: "" },
-  7: { name: "heaven", announcement_message: "" },
-  8: { name: "mate", announcement_message: "" },
-  9: { name: "rhyme", announcement_message: "" },
-  10: { name: "categories", announcement_message: "" },
-  11: { name: "never have I ever", announcement_message: "" },
-  12: { name: "questions", announcement_message: "" },
-  13: { name: "king's cup", announcement_message: "" },
-};
+// module.exports = {
+//   1: {
+//     name: "waterfall",
+//     description:
+//       "Don't stop chugging until the person left to you has stopped!",
+//   },
+//   2: { name: "You", description: "" },
+//   3: { name: "Me", description: "" },
+//   4: { name: "Floor", description: "" },
+//   5: { name: "Guys", description: "" },
+//   6: { name: "Chicks", description: "" },
+//   7: { name: "Heaven", description: "" },
+//   8: { name: "Mate", description: "" },
+//   9: { name: "Rhyme", description: "" },
+//   10: { name: "Categories", description: "" },
+//   11: { name: "Never have I ever", description: "" },
+//   12: { name: "Questions", description: "" },
+//   13: { name: "King's cup", description: "" },
+// };
