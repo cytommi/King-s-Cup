@@ -12,8 +12,41 @@ module.exports = (app) => {
   const addPlayer = async (room, player) =>
     await rc.rpush(`${room}:PLAYERS`, player);
 
-  const delPlayer = async (room, player) =>
-    await rc.lrem(`${room}:PLAYERS`, 0, player);
+  const delPlayer = async (room, disconnectedPlayer) => {
+    try {
+      const originalPlayers = await getPlayers(room);
+      const originalPlayerIndex = await getCurrentPlayer(room);
+      const originalPlayerName = originalPlayers[originalPlayerIndex];
+
+      if (originalPlayerName === disconnectedPlayer)
+        await incrCurrentPlayer(room);
+
+      const newPlayerName = originalPlayers[await getCurrentPlayer(room)];
+      /** Remove player from redis players list */
+      await rc.lrem(`${room}:PLAYERS`, 0, disconnectedPlayer);
+
+      /** Decrement expected responses for whatever form/announcement */
+      await rc.decr(`${room}:EXPECTED_RES`);
+
+      const newPlayers = await getPlayers(room);
+      if (newPlayers.length > 0)
+        await setCurrentPlayer(room, newPlayers.indexOf(newPlayerName));
+      else {
+        await rc.del(
+          `${room}:CARDS`,
+          `${room}:PLAYERS`,
+          `${room}:CURRENT_PLAYER`,
+          `${room}:CURRENT_CARD`,
+          `${room}:RESPONSES`,
+          `${room}:EXPECTED_RES`,
+          `${room}:PHASE`
+        );
+        console.log(`Closed room: ${room}`);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const getPlayers = async (room) => await rc.lrange(`${room}:PLAYERS`, 0, -1);
 

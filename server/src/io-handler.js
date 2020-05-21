@@ -2,10 +2,6 @@ const GameEvents = require("../../shared/GameEvents");
 const GamePhases = require("../../shared/GamePhases");
 
 module.exports = (app) => {
-  app.io.getNumSocketsInRoom = async (roomName) => {
-    return app.redisClient.llen(`${roomName}:players`);
-  };
-
   app.io.on("connection", (socket) => {
     socket.on(GameEvents.client.JOIN_GAME, async ({ name, gender, room }) => {
       socket.customInfo = {
@@ -30,6 +26,30 @@ module.exports = (app) => {
       }
     });
 
+    socket.on(GameEvents.client.QUIT_GAME, async ({ forceNextRound }) => {
+      const { name, gender, room } = socket.customInfo;
+      const playerName = `${name}_${gender}`;
+      await app.game.delPlayer(room, playerName);
+      socket.emit(GameEvents.server.BROADCAST.DATA_SYNC, {
+        currentPlayer: await app.game.getCurrentPlayer(room),
+        players: await app.game.getPlayers(room),
+      });
+      if (forceNextRound) {
+        app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+          header: `${name} has left the game.`,
+          bodyType: "string",
+          body: "Click to proceed to next round!",
+        });
+      }
+    });
+
+    socket.on("disconnect", async () => {
+      if (!socket.customInfo) return;
+      const { name, gender, room } = socket.customInfo;
+      const playerName = `${name}_${gender}`;
+      await app.game.delPlayer(room, playerName);
+    });
+
     socket.on(GameEvents.client.CLICKED_CARD, async () => {
       const { room } = socket.customInfo;
       /** 1. Set Phase to COUNTDOWN */
@@ -45,8 +65,9 @@ module.exports = (app) => {
           currentCard,
         });
 
-        /** 4. Set phase to CARD_REACTION_TIME  */
+        /** 4. Set phase to CARD_REACTION_TIME and reset number of responses*/
         await app.game.setPhase(room, GamePhases.CARD_REACTION_TIME);
+        await app.game.resetResponses(room);
 
         /** 5. Take action based on card */
         switch (currentCard.val) {
@@ -61,7 +82,6 @@ module.exports = (app) => {
               });
               await app.game.setPhase(room, GamePhases.PENDING_READY_RESPONSES);
             }, 1500);
-
             break;
 
           case 5:
@@ -84,12 +104,25 @@ module.exports = (app) => {
             app.io.in(room).emit(GameEvents.server.SHOW_FORM);
             await app.game.setExpectedResponses(room);
             await app.game.setPhase(room, GamePhases.PENDING_FORM_RESPONSES);
+            break;
+          case 12:
+            setTimeout(async () => {
+              await app.game.setExpectedResponses(room);
+              app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+                header: `${name} is the new Question Master!`,
+                bodyType: "text",
+                body: "Don't respond to his questions, got it?",
+              });
+              await app.game.setPhase(room, GamePhases.PENDING_READY_RESPONSES);
+            }, 1500);
 
+            break;
           default:
             setTimeout(async () => {
               app.io.in(room).emit(GameEvents.server.SHOW_FORM);
               await app.game.setPhase(room, GamePhases.PENDING_FORM_RESPONSES);
             }, 1500);
+            break;
         }
       }, 3050);
     });
@@ -123,7 +156,7 @@ module.exports = (app) => {
         case 7:
           await app.game.incrResponses(room);
           if (await app.game.isEnoughResponses(room)) {
-            await app.game.resetResponses(room);
+            // await app.game.resetResponses(room);
             await app.game.setExpectedResponses(room);
             app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
               header: type === 4 ? `4, FLOOR!` : "7, HEAVEN!",
@@ -186,7 +219,7 @@ module.exports = (app) => {
       const { room } = socket.customInfo;
       await app.game.incrResponses(room);
       if (await app.game.isEnoughResponses(room)) {
-        await app.game.resetResponses(room);
+        // await app.game.resetResponses(room);
         await app.game.incrCurrentPlayer(room);
         setTimeout(async () => {
           app.io.in(room).emit(GameEvents.server.BEGIN_ROUND, {
@@ -196,6 +229,7 @@ module.exports = (app) => {
         }, 1000);
       }
     });
+
     // socket.on(EventTypes.client.JOIN_GAME, async ({ name, room, gender }) => {
     //   socket.join(room);
     //   socket.customInfo = {
