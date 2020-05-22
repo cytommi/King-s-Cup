@@ -2,6 +2,8 @@ import React, { useEffect, useContext } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 import { GlobalContext } from '../../context/Global';
 import { GameContext } from '../../context/Game';
+import TopNav from './TopNav';
+import WaitingRoom from './WaitingRoom';
 import CenterPan from './CenterPan';
 import LeftPan from './LeftPan';
 import RightPan from './RightPan';
@@ -9,27 +11,17 @@ import GameEventHandler from './GameEventHandler';
 import GameEvents from '../../../../shared/GameEvents';
 import GamePhases from '../../../../shared/GamePhases';
 
-/** Components */
-import TopNav from './TopNav';
-
 import '../../styling/game/base.scss';
 
 const Game = () => {
   const { socket, user, resetUser } = useContext(GlobalContext);
   const [gameState, dispatch] = useContext(GameContext);
-  // const history = useHistory();
 
   const { roomcode } = useParams();
   if (user.room !== roomcode) return <Redirect to="/" />;
-  // useEffect(() => {
-  //   if (gameState.phase === GamePhases.PENDING_CARD_CLICK) {
-  //     dispatch('JOIN_ROUND');
-  //   }
-  // }, [gameState.phase]);
 
   useEffect(() => {
     socket.on(GameEvents.server.BROADCAST.DATA_SYNC, (latestState) => {
-      console.log(latestState);
       dispatch({
         type: GameEvents.server.BROADCAST.DATA_SYNC,
         payload: latestState,
@@ -100,14 +92,15 @@ const Game = () => {
       resetUser();
     };
   }, []);
+
   return (
     <div id="game">
       <GameEventHandler />
+      <TopNav />
       {gameState.pendingJoin ? (
-        <h1>waiting for next round</h1>
+        <WaitingRoom />
       ) : (
         <>
-          <TopNav />
           <LeftPan />
           <CenterPan />
           <RightPan />

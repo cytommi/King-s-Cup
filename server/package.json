@@ -9,7 +9,8 @@
     "redis": "docker start kings-cup-redis",
     "redis-a": "docker exec -it kings-cup-redis /bin/bash ",
     "redis-d": "docker stop kings-cup-redis",
-    "serve-watch": "npx nodemon src/server.js"
+    "serve:dev-watch": "npx nodemon src/server.js",
+    "serve:prod": "NODE_ENV=production node src/server.js"
   },
   "dependencies": {
     "async-redis": "^1.1.7",

@@ -105,7 +105,7 @@ module.exports = (app) => {
     });
 
     socket.on(GameEvents.client.CLICKED_CARD, async () => {
-      const { room } = socket.customInfo;
+      const { room, name, gender } = socket.customInfo;
       /** 1. Set Phase to COUNTDOWN */
       await app.game.setPhase(room, GamePhases.COUNTDOWN);
 

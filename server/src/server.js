@@ -1,8 +1,9 @@
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 const redis = require("async-redis");
-// const redis = require('redis');
 const http = require("http");
+const https = require("https");
 const socketIO = require("socket.io");
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -45,7 +46,28 @@ const setupServer = async () => {
 
   let server;
   if (NODE_ENV === "production") {
-    console.log("Not yet, man.");
+    const options = {
+      key: fs.readFileSync(process.env.HTTPS_KEY_PATH, "utf8"),
+      cert: fs.readFileSync(process.env.HTTPS_CERT_PATH, "utf8"),
+      ca: fs.readFileSync(process.env.HTTPS_CA_PATH, "utf8"),
+    };
+
+    // Listen for HTTPS requests
+    server = https.createServer(options, app).listen(port, () => {
+      console.log(`Server listening on: ${server.address().port}`);
+    });
+
+    // Redirect HTTP to HTTPS
+    http
+      .createServer((req, res) => {
+        const location = `https://www.cytommigames.com`;
+        console.log(`Redirect to: ${location}`);
+        res.writeHead(302, { Location: location });
+        res.end();
+      })
+      .listen(80, () => {
+        console.log(`King's Cup server listening on 80 for HTTPS redirect`);
+      });
   } else {
     server = http.createServer(app);
     const io = socketIO(server);
