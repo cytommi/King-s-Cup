@@ -46,28 +46,33 @@ const setupServer = async () => {
 
   let server;
   if (NODE_ENV === "production") {
-    const options = {
-      key: fs.readFileSync(process.env.HTTPS_KEY_PATH, "utf8"),
-      cert: fs.readFileSync(process.env.HTTPS_CERT_PATH, "utf8"),
-      ca: fs.readFileSync(process.env.HTTPS_CA_PATH, "utf8"),
-    };
+    // const options = {
+    //   key: fs.readFileSync(process.env.HTTPS_KEY_PATH, "utf8"),
+    //   cert: fs.readFileSync(process.env.HTTPS_CERT_PATH, "utf8"),
+    //   ca: fs.readFileSync(process.env.HTTPS_CA_PATH, "utf8"),
+    // };
 
-    // Listen for HTTPS requests
-    server = https.createServer(options, app).listen(port, () => {
-      console.log(`Server listening on: ${server.address().port}`);
-    });
+    // // Listen for HTTPS requests
+    // server = https.createServer(options, app).listen(port, () => {
+    //   console.log(`Server listening on: ${server.address().port}`);
+    // });
 
     // Redirect HTTP to HTTPS
-    http
-      .createServer((req, res) => {
-        const location = `https://www.cytommigames.com`;
-        console.log(`Redirect to: ${location}`);
-        res.writeHead(302, { Location: location });
-        res.end();
-      })
-      .listen(80, () => {
-        console.log(`King's Cup server listening on 80 for HTTPS redirect`);
-      });
+    // http
+    //   .createServer((req, res) => {
+    //     const location = `https://www.cytommigames.com`;
+    //     console.log(`Redirect to: ${location}`);
+    //     res.writeHead(302, { Location: location });
+    //     res.end();
+    //   })
+    //   .listen(80, () => {
+    //     console.log(`King's Cup server listening on 80 for HTTPS redirect`);
+    //   });
+    server = http.createServer(app);
+    const io = socketIO(server);
+    app.io = io;
+    require("./io-handler")(app);
+    server.listen(80, () => console.log(`King's Cup server listening on 80`));
   } else {
     server = http.createServer(app);
     const io = socketIO(server);
