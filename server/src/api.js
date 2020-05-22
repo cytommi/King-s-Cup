@@ -51,8 +51,8 @@ module.exports = (app) => {
       await app.game.setPhase(room, GamePhases.PENDING_CARD_CLICK);
 
       /** DELETE THIS */
-      for (let i = 13; i >= 1; --i)
-        await app.redisClient.lpush(`${room}:CARDS`, i);
+      // for (let i = 13; i >= 1; --i)
+      //   await app.redisClient.lpush(`${room}:CARDS`, i);
 
       await app.game.setCurrentPlayer(room, 0);
       res.status(201).send();
