@@ -14,6 +14,7 @@ module.exports = {
     BEGIN_ROUND: "BEGIN_ROUND",
 
     BROADCAST: {
+      INIT_DATA_SYNC: "INIT_DATA_SYNC",
       DATA_SYNC: "DATA_SYNC",
       NEW_MEMBER: "NEW_MEMBER",
     },

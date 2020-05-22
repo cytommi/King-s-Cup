@@ -45,7 +45,9 @@ const PlayerSelectForm = () => {
       {gameState.currentCard.val === 2 && <h1>PICK A VICTIM!</h1>}
       {gameState.currentCard.val === 8 && <h1>PICK A MATE!</h1>}
       {playerOptions}
-      <button onClick={onClick}>submit</button>
+      <button onClick={onClick} disabled={selectedPlayer === ''}>
+        submit
+      </button>
     </form>
   );
 };

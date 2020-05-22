@@ -26,7 +26,7 @@ module.exports = (app) => {
       await rc.lrem(`${room}:PLAYERS`, 0, disconnectedPlayer);
 
       /** Decrement expected responses for whatever form/announcement */
-      await rc.decr(`${room}:EXPECTED_RES`);
+      await setExpectedResponses(room);
 
       const newPlayers = await getPlayers(room);
       if (newPlayers.length > 0)
@@ -61,6 +61,15 @@ module.exports = (app) => {
     return players.filter((p) => p.split("_")[1] === "F");
   };
 
+  /** PENDING_JOINS */
+  const incrPendingJoins = async (room) =>
+    await rc.incr(`${room}:PENDING_JOINS`);
+
+  const getPendingJoins = async (room) => await rc.get(`${room}:PENDING_JOINS`);
+
+  const clearPendingJoins = async (room) =>
+    await rc.set(`${room}:PENDING_JOINS`, 0);
+
   /** CURRENT_PLAYER */
   const setCurrentPlayer = async (room, index) =>
     await rc.set(`${room}:CURRENT_PLAYER`, index);
@@ -69,7 +78,7 @@ module.exports = (app) => {
     await rc.get(`${room}:CURRENT_PLAYER`);
 
   const incrCurrentPlayer = async (room) => {
-    const curInd = await getCurrentPlayer(room);
+    const curInd = Number(await getCurrentPlayer(room));
     const playersCount = await getPlayersCount(room);
     await setCurrentPlayer(room, (curInd + 1) % playersCount);
   };
@@ -101,14 +110,18 @@ module.exports = (app) => {
 
   /** EXPECTED_RESPONSES */
   const setExpectedResponses = async (room) =>
-    await rc.set(`${room}:EXPECTED_RES`, await getPlayersCount(room));
+    await rc.set(
+      `${room}:EXPECTED_RES`,
+      Number(await getPlayersCount(room)) - Number(await getPendingJoins(room))
+    );
   const getExpectedResponses = async (room) =>
     await rc.get(`${room}:EXPECTED_RES`);
 
   /** RESPONSES */
   const incrResponses = async (room) => await rc.incr(`${room}:RESPONSES`);
   const isEnoughResponses = async (room) =>
-    (await rc.get(`${room}:RESPONSES`)) === (await getExpectedResponses(room));
+    Number(await rc.get(`${room}:RESPONSES`)) >=
+    Number(await getExpectedResponses(room));
   const resetResponses = async (room) => await rc.set(`${room}:RESPONSES`, 0);
 
   /** STATE */
@@ -129,6 +142,11 @@ module.exports = (app) => {
     getPlayersCount,
     getMalePlayers,
     getFemalePlayers,
+
+    /** PENDING_JOINS */
+    incrPendingJoins,
+    getPendingJoins,
+    clearPendingJoins,
 
     /** CURRENT_PLAYER */
     setCurrentPlayer,

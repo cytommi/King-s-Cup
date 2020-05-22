@@ -4,42 +4,29 @@ const GamePhases = require("../../shared/GamePhases");
 module.exports = (app) => {
   app.io.on("connection", (socket) => {
     socket.on(GameEvents.client.JOIN_GAME, async ({ name, gender, room }) => {
+      console.log(`${name} has joined ${room}`);
       socket.customInfo = {
         name,
         gender,
         room,
       };
-
       socket.join(room);
 
       try {
         socket.emit(
-          GameEvents.server.BROADCAST.DATA_SYNC,
+          GameEvents.server.BROADCAST.INIT_DATA_SYNC,
           await app.game.getState(room)
         );
-        socket.broadcast.emit(
-          GameEvents.server.BROADCAST.NEW_MEMBER,
-          await app.game.getPlayers(room)
-        );
+        if ((await app.game.getPhase(room)) !== GamePhases.PENDING_CARD_CLICK) {
+          await app.game.incrPendingJoins(room);
+        } else {
+          socket.broadcast.emit(
+            GameEvents.server.BROADCAST.NEW_MEMBER,
+            await app.game.getPlayers(room)
+          );
+        }
       } catch (err) {
         console.log(err);
-      }
-    });
-
-    socket.on(GameEvents.client.QUIT_GAME, async ({ forceNextRound }) => {
-      const { name, gender, room } = socket.customInfo;
-      const playerName = `${name}_${gender}`;
-      await app.game.delPlayer(room, playerName);
-      socket.emit(GameEvents.server.BROADCAST.DATA_SYNC, {
-        currentPlayer: await app.game.getCurrentPlayer(room),
-        players: await app.game.getPlayers(room),
-      });
-      if (forceNextRound) {
-        app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
-          header: `${name} has left the game.`,
-          bodyType: "string",
-          body: "Click to proceed to next round!",
-        });
       }
     });
 
@@ -47,7 +34,74 @@ module.exports = (app) => {
       if (!socket.customInfo) return;
       const { name, gender, room } = socket.customInfo;
       const playerName = `${name}_${gender}`;
+
       await app.game.delPlayer(room, playerName);
+      // /** Update Players list in client view */
+      socket.broadcast.emit(GameEvents.server.BROADCAST.DATA_SYNC, {
+        currentPlayer: await app.game.getCurrentPlayer(room),
+        players: await app.game.getPlayers(room),
+      });
+
+      await app.game.setExpectedResponses(room);
+      if (app.game.isEnoughResponses(room)) {
+        app.io.in(room).emit(GameEvents.server.BEGIN_ROUND, {
+          currentPlayer: await app.game.getCurrentPlayer(room),
+        });
+        if (Number(await app.game.getPendingJoins(room)) > 0) {
+          await app.game.clearPendingJoins(room);
+          app.io
+            .in(room)
+            .emit(
+              GameEvents.server.BROADCAST.NEW_MEMBER,
+              await app.game.getPlayers(room)
+            );
+        }
+        await app.game.setPhase(room, GamePhases.PENDING_CARD_CLICK);
+      } else {
+        await app.game.resetResponses(room);
+        await app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+          header: `${name} just left the game.`,
+          bodyType: "string",
+          body: "Let's start with a fresh round!",
+        });
+      }
+    });
+
+    socket.on(GameEvents.client.QUIT_GAME, async () => {
+      if (!socket.customInfo) return;
+      const { name, gender, room } = socket.customInfo;
+      const playerName = `${name}_${gender}`;
+
+      await app.game.delPlayer(room, playerName);
+      // /** Update Players list in client view */
+      socket.broadcast.emit(GameEvents.server.BROADCAST.DATA_SYNC, {
+        currentPlayer: await app.game.getCurrentPlayer(room),
+        players: await app.game.getPlayers(room),
+      });
+
+      await app.game.setExpectedResponses(room);
+      if (app.game.isEnoughResponses(room)) {
+        app.io.in(room).emit(GameEvents.server.BEGIN_ROUND, {
+          currentPlayer: await app.game.getCurrentPlayer(room),
+        });
+        if (Number(await app.game.getPendingJoins(room)) > 0) {
+          await app.game.clearPendingJoins(room);
+          app.io
+            .in(room)
+            .emit(
+              GameEvents.server.BROADCAST.NEW_MEMBER,
+              await app.game.getPlayers(room)
+            );
+        }
+        await app.game.setPhase(room, GamePhases.PENDING_CARD_CLICK);
+      } else {
+        await app.game.resetResponses(room);
+        await app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
+          header: `${name} just left the game.`,
+          bodyType: "string",
+          body: "Let's start with a fresh round!",
+        });
+      }
     });
 
     socket.on(GameEvents.client.CLICKED_CARD, async () => {
@@ -225,6 +279,16 @@ module.exports = (app) => {
           app.io.in(room).emit(GameEvents.server.BEGIN_ROUND, {
             currentPlayer: await app.game.getCurrentPlayer(room),
           });
+          if (Number(await app.game.getPendingJoins(room)) > 0) {
+            await app.game.clearPendingJoins(room);
+            app.io
+              .in(room)
+              .emit(
+                GameEvents.server.BROADCAST.NEW_MEMBER,
+                await app.game.getPlayers(room)
+              );
+          }
+
           await app.game.setPhase(room, GamePhases.PENDING_CARD_CLICK);
         }, 1000);
       }

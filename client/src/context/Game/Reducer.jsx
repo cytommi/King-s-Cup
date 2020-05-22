@@ -1,5 +1,6 @@
 import GameEvents from '../../../../shared/GameEvents';
 import GamePhases from '../../../../shared/GamePhases';
+import GameEventHandler from '../../components/Game/GameEventHandler';
 
 const GameReducer = (state, action) => {
   switch (action.type) {
@@ -31,12 +32,18 @@ const GameReducer = (state, action) => {
     case GameEvents.server.BEGIN_ROUND:
       return {
         ...state,
+        pendingJoin: false,
         phase: GamePhases.PENDING_CARD_CLICK,
         announcement: {},
         currentPlayer: action.payload,
       };
 
     /** BROADCAST EVENTS */
+    case GameEvents.server.BROADCAST.INIT_DATA_SYNC:
+      return {
+        ...state,
+        ...action.payload,
+      };
     case GameEvents.server.BROADCAST.DATA_SYNC:
       return {
         ...state,
@@ -52,6 +59,12 @@ const GameReducer = (state, action) => {
       return {
         ...state,
         mates: [...state.mates, action.payload],
+      };
+
+    case 'JOIN_ROUND':
+      return {
+        ...state,
+        pendingJoin: false,
       };
   }
 };

@@ -2,6 +2,7 @@ import React, { createContext, useReducer } from 'react';
 import GameReducer from './Reducer';
 
 const initialState = {
+  pendingJoin: true,
   phase: undefined,
   players: [],
   currentPlayer: -1,
