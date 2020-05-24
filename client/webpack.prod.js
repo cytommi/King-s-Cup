@@ -93,7 +93,6 @@ module.exports = {
     }),
     new HtmlWebpackPugPlugin(),
     new WebpackBar(),
-    // new Webpack.SourceMapDevToolPlugin({ filename: '[name].[contenthash].js' })
   ],
   optimization: {
     runtimeChunk: 'single',
