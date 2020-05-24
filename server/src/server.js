@@ -7,6 +7,7 @@ const https = require("https");
 const socketIO = require("socket.io");
 const path = require("path");
 const bodyParser = require("body-parser");
+const compression = require("compression");
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 require("dotenv").config({
@@ -18,6 +19,7 @@ const { SERVER_PORT, REDIS_PORT } = process.env;
 const setupServer = async () => {
   const app = express();
   app.use(cors());
+  app.use(compression());
   app.set("view engine", "pug");
   app.set("views", path.join(__dirname, `../dist`));
   app.use(express.static(path.join(__dirname, "../dist")));
@@ -59,7 +61,6 @@ const setupServer = async () => {
     http
       .createServer((req, res) => {
         const location = `https://www.cytommigames.com`;
-        console.log(`Redirect to: ${location}`);
         res.writeHead(302, { Location: location });
         res.end();
       })
