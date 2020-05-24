@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { GameContext } from '../../../context/Game';
-import '../../../styling/game/questionmaster.scss';
+import '../../../styling/game/questionMaster.scss';
 
 const QuestionMaster = () => {
   const [gameState, dispatch] = useContext(GameContext);
