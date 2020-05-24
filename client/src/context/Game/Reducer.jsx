@@ -55,10 +55,17 @@ const GameReducer = (state, action) => {
         ...state,
         players: action.payload,
       };
+
+    case GameEvents.server.BROADCAST.SET_QUESTION_MASTER:
+      return {
+        ...state,
+        questionMaster: action.payload,
+      };
+
     case 'ADD_MATE':
       return {
         ...state,
-        mates: [...state.mates, action.payload],
+        mates: Array.from(new Set([...state.mates, action.payload])),
       };
 
     case 'JOIN_ROUND':

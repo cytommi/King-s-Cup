@@ -1,0 +1,23 @@
+@use '../colors';
+#room-code {
+  font-family: 'oswald', sans-serif;
+
+  #header {
+    color: colors.$alert_0;
+  }
+  #container {
+    background-color: colors.$success_0;
+    box-shadow: 4px 2px 4px colors.$main_-2;
+    border-radius: 0.7em;
+    border: 3px solid colors.$form_highlight;
+    padding: 1em 0.3em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    #content {
+      color: colors.$main_-1;
+      text-align: center;
+    }
+  }
+}

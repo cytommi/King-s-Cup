@@ -2,7 +2,8 @@ const GameEvents = require("../../shared/GameEvents");
 const GamePhases = require("../../shared/GamePhases");
 
 module.exports = (app) => {
-  app.io.on("connection", (socket) => {
+  app.io.on("connection", async (socket) => {
+    await app.game.incrTotalConnectionsCount();
     socket.on(GameEvents.client.JOIN_GAME, async ({ name, gender, room }) => {
       console.log(`${name} has joined ${room}`);
       socket.customInfo = {
@@ -31,6 +32,7 @@ module.exports = (app) => {
     });
 
     socket.on("disconnect", async () => {
+      await app.game.decrCurrentConnectionsCount();
       if (!socket.customInfo) return;
       const { name, gender, room } = socket.customInfo;
       const playerName = `${name}_${gender}`;
@@ -40,6 +42,7 @@ module.exports = (app) => {
       socket.broadcast.emit(GameEvents.server.BROADCAST.DATA_SYNC, {
         currentPlayer: await app.game.getCurrentPlayer(room),
         players: await app.game.getPlayers(room),
+        questionMaster: await app.game.getQuestionMaster(room),
       });
 
       await app.game.setExpectedResponses(room);
@@ -68,6 +71,7 @@ module.exports = (app) => {
     });
 
     socket.on(GameEvents.client.QUIT_GAME, async () => {
+      await app.game.decrCurrentConnectionsCount();
       if (!socket.customInfo) return;
       const { name, gender, room } = socket.customInfo;
       const playerName = `${name}_${gender}`;
@@ -162,12 +166,18 @@ module.exports = (app) => {
           case 12:
             setTimeout(async () => {
               await app.game.setExpectedResponses(room);
+              await app.game.setQuestionMaster(room, `${name}_${gender}`);
               app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
                 header: `${name} is the new Question Master!`,
                 bodyType: "text",
                 body: "Don't respond to his questions, got it?",
               });
               await app.game.setPhase(room, GamePhases.PENDING_READY_RESPONSES);
+              app.io
+                .in(room)
+                .emit(GameEvents.server.BROADCAST.SET_QUESTION_MASTER, {
+                  questionMaster: await app.game.getQuestionMaster(room),
+                });
             }, 1500);
 
             break;

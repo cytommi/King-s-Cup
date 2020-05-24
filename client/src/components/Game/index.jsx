@@ -2,7 +2,6 @@ import React, { useEffect, useContext } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 import { GlobalContext } from '../../context/Global';
 import { GameContext } from '../../context/Game';
-import TopNav from './TopNav';
 import WaitingRoom from './WaitingRoom';
 import CenterPan from './CenterPan';
 import LeftPan from './LeftPan';
@@ -21,6 +20,7 @@ const Game = () => {
   if (user.room !== roomcode) return <Redirect to="/" />;
 
   useEffect(() => {
+    /** BROADCAST EVENTS */
     socket.on(GameEvents.server.BROADCAST.DATA_SYNC, (latestState) => {
       dispatch({
         type: GameEvents.server.BROADCAST.DATA_SYNC,
@@ -35,6 +35,17 @@ const Game = () => {
       });
     });
 
+    socket.on(
+      GameEvents.server.BROADCAST.SET_QUESTION_MASTER,
+      ({ questionMaster }) => {
+        dispatch({
+          type: GameEvents.server.BROADCAST.SET_QUESTION_MASTER,
+          payload: questionMaster,
+        });
+      }
+    );
+
+    /** GAME EVENTS */
     socket.on(GameEvents.server.BEGIN_COUNTDOWN, () =>
       dispatch({
         type: GameEvents.server.BEGIN_COUNTDOWN,
@@ -96,7 +107,6 @@ const Game = () => {
   return (
     <div id="game">
       <GameEventHandler />
-      <TopNav />
       {gameState.pendingJoin ? (
         <WaitingRoom />
       ) : (

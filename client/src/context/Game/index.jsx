@@ -10,6 +10,7 @@ const initialState = {
   drinksHad: 0,
   mates: [],
   announcement: undefined,
+  questionMaster: undefined,
 };
 
 export const GameContext = createContext(initialState);

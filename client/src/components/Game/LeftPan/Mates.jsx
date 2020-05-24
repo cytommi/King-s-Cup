@@ -8,7 +8,7 @@ const Mates = () => {
   const [gameState, dispatch] = useContext(GameContext);
   return gameState?.mates?.length > 0 ? (
     <div id="mates">
-      <h2>Mates</h2>
+      <h2> Your Mates</h2>
       <div id="mates-list">
         <ul>
           {gameState.mates.length > 0 &&

@@ -17,6 +17,7 @@ module.exports = {
       INIT_DATA_SYNC: "INIT_DATA_SYNC",
       DATA_SYNC: "DATA_SYNC",
       NEW_MEMBER: "NEW_MEMBER",
+      SET_QUESTION_MASTER: "SET_QUESTION_MASTER",
     },
   },
 };

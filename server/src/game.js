@@ -18,8 +18,10 @@ module.exports = (app) => {
       const originalPlayerIndex = await getCurrentPlayer(room);
       const originalPlayerName = originalPlayers[originalPlayerIndex];
 
-      if (originalPlayerName === disconnectedPlayer)
+      if (originalPlayerName === disconnectedPlayer) {
         await incrCurrentPlayer(room);
+        await resetQuestionMaster(room);
+      }
 
       const newPlayerName = originalPlayers[await getCurrentPlayer(room)];
       /** Remove player from redis players list */
@@ -32,6 +34,8 @@ module.exports = (app) => {
       if (newPlayers.length > 0)
         await setCurrentPlayer(room, newPlayers.indexOf(newPlayerName));
       else {
+        /** CLOSE ROOM */
+        await decrCurrentRoomCount();
         await rc.del(
           `${room}:CARDS`,
           `${room}:PLAYERS`,
@@ -39,7 +43,8 @@ module.exports = (app) => {
           `${room}:CURRENT_CARD`,
           `${room}:RESPONSES`,
           `${room}:EXPECTED_RES`,
-          `${room}:PHASE`
+          `${room}:PHASE`,
+          `${room}:QUESTION_MASTER`
         );
         console.log(`Closed room: ${room}`);
       }
@@ -82,6 +87,16 @@ module.exports = (app) => {
     const playersCount = await getPlayersCount(room);
     await setCurrentPlayer(room, (curInd + 1) % playersCount);
   };
+
+  /** QUESTION_MASTER */
+  const setQuestionMaster = async (room, player) =>
+    await rc.set(`${room}:QUESTION_MASTER`, player);
+
+  const getQuestionMaster = async (room) =>
+    await rc.get(`${room}:QUESTION_MASTER`);
+
+  const resetQuestionMaster = async (room) =>
+    await rc.del(`${room}:QUESTION_MASTER`);
 
   /** CARDS */
   const initCards = async (room) =>
@@ -131,8 +146,24 @@ module.exports = (app) => {
       currentPlayer: await getCurrentPlayer(room),
       currentCard: await getCurrentCard(room),
       phase: await getPhase(room),
+      questionMaster: await getQuestionMaster(room),
     };
   };
+
+  /** ANALYTICS */
+  const incrTotalConnectionsCount = async () =>
+    await rc.incr("ANALYTICS:TOTAL_CONNECTIONS");
+  const incrCurrentConnectionsCount = async () =>
+    await rc.incr("ANALYTICS:CURRENT_CONNECTIONS_COUNT");
+  const decrCurrentConnectionsCount = async () =>
+    await rc.decr("ANALYTICS:CURRENT_CONNECTIONS_COUNT");
+  const incrTotalRoomsCreated = async () =>
+    await rc.incr("ANALYTICS:TOTAL_ROOMS_CREATED");
+  const incrCurrentRoomCount = async () =>
+    await rc.incr("ANALYTICS:CURRENT_ROOM_COUNT");
+  const decrCurrentRoomCount = async () =>
+    await rc.decr("ANALYTICS:CURRENT_ROOM_COUNT");
+
   app.game = {
     roomExists,
     /** PLAYERS */
@@ -152,6 +183,11 @@ module.exports = (app) => {
     setCurrentPlayer,
     getCurrentPlayer,
     incrCurrentPlayer,
+
+    /** QUESTION_MASTER */
+    setQuestionMaster,
+    getQuestionMaster,
+    resetQuestionMaster,
 
     /** CARDS */
     initCards,
@@ -176,5 +212,13 @@ module.exports = (app) => {
 
     /** STATE */
     getState,
+
+    /** ANALYTICS */
+    incrTotalConnectionsCount,
+    incrCurrentConnectionsCount,
+    decrCurrentConnectionsCount,
+    incrTotalRoomsCreated,
+    incrCurrentRoomCount,
+    decrCurrentRoomCount,
   };
 };
