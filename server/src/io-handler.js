@@ -264,7 +264,7 @@ module.exports = (app) => {
           await app.game.setExpectedResponses(room);
           app.io.in(room).emit(GameEvents.server.SHOW_ANNOUNCEMENT, {
             header: `${name} has never...`,
-            bodyTYpe: "string",
+            bodyType: "string",
             body: payload,
           });
           break;

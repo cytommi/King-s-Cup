@@ -45,9 +45,16 @@ const GameReducer = (state, action) => {
         ...action.payload,
       };
     case GameEvents.server.BROADCAST.DATA_SYNC:
+      let updatedMates = state.mates;
+      if (action.payload.players && state.mates.length > 0) {
+        updatedMates = updatedMates.filter(
+          (m) => action.payload.players.indexOf(m) !== -1
+        );
+      }
       return {
         ...state,
         ...action.payload,
+        mates: updatedMates,
       };
 
     case GameEvents.server.BROADCAST.NEW_MEMBER:
