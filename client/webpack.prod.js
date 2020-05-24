@@ -6,8 +6,6 @@ const HtmlWebpackPugPlugin = require('html-webpack-pug-plugin');
 const WebpackBar = require('webpackbar');
 const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-  .BundleAnalyzerPlugin;
 
 module.exports = {
   context: path.join(__dirname, '/src'),
@@ -91,7 +89,6 @@ module.exports = {
     }),
     new HtmlWebpackPugPlugin(),
     new WebpackBar(),
-    new BundleAnalyzerPlugin(),
   ],
   optimization: {
     runtimeChunk: 'single',
