@@ -13,7 +13,6 @@ module.exports = {
   context: path.join(__dirname, '/src'),
   mode: 'production',
   entry: ['babel-polyfill', './App.jsx'],
-  devtool: 'inline-source-map',
   module: {
     rules: [
       {
@@ -63,7 +62,6 @@ module.exports = {
   output: {
     filename: '[name].[contenthash].js',
     path: path.join(__dirname, '../server/dist'),
-    sourceMapFilename: '[name].js.map',
   },
   plugins: [
     new Dotenv({ path: path.join(__dirname, `.env.production`) }),
