@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Meta from './Meta';
 import {
   BrowserRouter as Router,
   Switch,
@@ -14,23 +15,26 @@ import './styling/global.scss';
 
 const App = () => {
   return (
-    <GlobalProvider>
-      <Router>
-        <Switch>
-          <Route exact path="/" component={Home} />
-          <Route
-            exact
-            path="/game/:roomcode"
-            render={() => (
-              <GameProvider>
-                <Game />
-              </GameProvider>
-            )}
-          />
-          <Route path="*" render={() => <Redirect to="/" />} />
-        </Switch>
-      </Router>
-    </GlobalProvider>
+    <>
+      <Meta />
+      <GlobalProvider>
+        <Router>
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route
+              exact
+              path="/game/:roomcode"
+              render={() => (
+                <GameProvider>
+                  <Game />
+                </GameProvider>
+              )}
+            />
+            <Route path="*" render={() => <Redirect to="/" />} />
+          </Switch>
+        </Router>
+      </GlobalProvider>
+    </>
   );
 };
 
