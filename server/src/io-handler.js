@@ -3,7 +3,7 @@ const GamePhases = require("../../shared/GamePhases");
 
 module.exports = (app) => {
   app.io.on("connection", async (socket) => {
-    await app.game.incrCunrrentConnectionsCount();
+    await app.game.incrCurrentConnectionsCount();
     await app.game.incrTotalConnectionsCount();
     socket.on(GameEvents.client.JOIN_GAME, async ({ name, gender, room }) => {
       console.log(`${name} has joined ${room}`);
