@@ -77,11 +77,19 @@ module.exports = {
       meta: {
         charset: 'utf-8',
         viewport: 'width=device-width, initial-scale=1, shrink-to-fit=no',
+        title: `King's cup | Play Online Free`,
         description:
           'Play the famous drinking game online for free with your friends! No registration required!',
         robots: 'index, nofollow',
+        'og:title': `Play King's Cup!`,
+        'og:description':
+          'Play the famous drinking game online with friends for free. No registration required!',
+        'og:url': 'https://www.cytommigames.com',
+        'og:type': 'website',
+        'og:image': path.join(__dirname, './src/assets/images/Kings_Cup.png'),
       },
       favicon: path.join(__dirname, './src/assets/icons/favicon.ico'),
+      cache: false,
     }),
     new HtmlWebpackPugPlugin(),
     new WebpackBar(),
