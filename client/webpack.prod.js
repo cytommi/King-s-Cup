@@ -84,6 +84,7 @@ module.exports = {
           'Play the famous drinking game online with friends for free. No registration required!',
         'og:url': 'https://www.cytommigames.com',
         'og:type': 'website',
+        'og:image': path.join(__dirname, './src/assets/images/Kings_Cup.jpg'),
       },
       favicon: path.join(__dirname, './src/assets/icons/favicon.ico'),
     }),
