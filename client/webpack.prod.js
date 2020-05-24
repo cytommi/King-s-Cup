@@ -6,6 +6,8 @@ const HtmlWebpackPugPlugin = require('html-webpack-pug-plugin');
 const WebpackBar = require('webpackbar');
 const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
 
 module.exports = {
   context: path.join(__dirname, '/src'),
@@ -86,13 +88,13 @@ module.exports = {
           'Play the famous drinking game online with friends for free. No registration required!',
         'og:url': 'https://www.cytommigames.com',
         'og:type': 'website',
-        // 'og:image': path.join(__dirname, './src/assets/images/Kings_Cup.png'),
+        'og:image': path.join(__dirname, './src/assets/images/Kings_Cup.png'),
       },
       favicon: path.join(__dirname, './src/assets/icons/favicon.ico'),
-      cache: false,
     }),
     new HtmlWebpackPugPlugin(),
     new WebpackBar(),
+    new BundleAnalyzerPlugin(),
   ],
   optimization: {
     runtimeChunk: 'single',

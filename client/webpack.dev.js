@@ -6,6 +6,8 @@ const HtmlWebpackPugPlugin = require('html-webpack-pug-plugin');
 const WebpackBar = require('webpackbar');
 const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
 
 module.exports = {
   context: path.join(__dirname, '/src'),
@@ -89,11 +91,10 @@ module.exports = {
         'og:image': path.join(__dirname, './src/assets/images/Kings_Cup.png'),
       },
       favicon: path.join(__dirname, './src/assets/icons/favicon.ico'),
-      cache: false,
     }),
     new HtmlWebpackPugPlugin(),
     new WebpackBar(),
-    // new Webpack.SourceMapDevToolPlugin({ filename: '[name].[contenthash].js' })
+    new BundleAnalyzerPlugin(),
   ],
   optimization: {
     runtimeChunk: 'single',
