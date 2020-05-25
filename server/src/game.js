@@ -36,6 +36,8 @@ module.exports = (app) => {
       else {
         /** CLOSE ROOM */
         await decrCurrentRoomCount();
+        await rc.del(`${room}:PHASE`);
+        await rc.del(`${room}:EXPECTED_RES`);
         setTimeout(async () => {
           await rc.del(
             `${room}:CARDS`,
