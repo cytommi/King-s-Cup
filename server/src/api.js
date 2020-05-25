@@ -50,12 +50,6 @@ module.exports = (app) => {
       /** Initialize game phase to pendingCardClick */
       await app.game.setPhase(room, GamePhases.PENDING_CARD_CLICK);
 
-      /** DELETE THIS */
-      await app.redisClient.lpush(`${room}:CARDS`, 12);
-      await app.redisClient.lpush(`${room}:CARDS`, 8);
-      // for (let i = 13; i >= 1; --i)
-      //   await app.redisClient.lpush(`${room}:CARDS`, i);
-
       await app.game.setCurrentPlayer(room, 0);
       await app.game.incrTotalRoomsCreated();
       await app.game.incrCurrentRoomCount();
