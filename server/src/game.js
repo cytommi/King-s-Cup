@@ -36,14 +36,18 @@ module.exports = (app) => {
       else {
         /** CLOSE ROOM */
         await decrCurrentRoomCount();
-        await rc.del(`${room}:CARDS`);
-        await rc.del(`${room}:PLAYERS`);
-        await rc.del(`${room}:CURRENT_PLAYER`);
-        await rc.del(`${room}:RESPONSES`);
-        await rc.del(`${room}:CURRENT_CARD`);
-        await rc.del(`${room}:EXPECTED_RES`);
-        await rc.del(`${room}:PHASE`);
-        await rc.del(`${room}:QUESTION_MASTER`);
+        setTimeout(async () => {
+          await rc.del(
+            `${room}:CARDS`,
+            `${room}:PLAYERS`,
+            `${room}:CURRENT_PLAYER`,
+            `${room}:CURRENT_CARD`,
+            `${room}:RESPONSES`,
+            `${room}:EXPECTED_RES`,
+            `${room}:PHASE`,
+            `${room}:QUESTION_MASTER`
+          );
+        }, 5000);
 
         console.log(`Closed room: ${room}`);
       }
